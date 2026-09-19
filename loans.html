@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Loans & Advances</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+
+    <!-- ================= LOGIN MODAL / SCREEN ================= -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
+                <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    Invalid User ID or Password!
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to System
+                </button>
+            </form>
+            <div class="mt-4 text-center text-xs text-slate-400">
+                Default Credentials: <b>admin</b> / <b>admin123</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP DASHBOARD ================= -->
+    <div id="appContainer" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm custom-scrollbar">
+                <a href="dashboard.html" onclick="protectNav(event, 'dashboard.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-indigo-600"></i> Employee Loan & Advance Management
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span id="userBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border">
+                        Logged in: <b id="loggedInUserDisplay" class="text-indigo-600">Admin</b>
+                    </span>
+                    <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+                <!-- MODULE DISPLAY HEADER CARD -->
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400">HRMS Core Module</span>
+                        <h2 class="text-2xl font-black mt-1">Loans & Advances</h2>
+                        <p class="text-xs text-slate-300 mt-1">Issue Loans, Track Installment Deductions & Manage Active Loan Ledgers</p>
+                    </div>
+                    <div class="w-14 h-14 bg-indigo-600/30 border border-indigo-400/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-300">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                </div>
+
+                <!-- CARD 1: ISSUE NEW LOAN / ADVANCE -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-indigo-600"></i> Issue New Loan / Advance
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Fill in the details below to assign a loan or advance to an employee.</p>
+                    </div>
+
+                    <form id="issueLoanForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+                            <div>
+                                <label for="loanEmpSelect" class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee *</label>
+                                <select id="loanEmpSelect" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                                    <option value="">-- Choose Employee --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="loanAmount" class="block text-xs font-bold text-slate-700 uppercase mb-2">Loan Amount (Rs.) *</label>
+                                <input type="number" id="loanAmount" placeholder="e.g. 50000" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label for="monthlyDeduction" class="block text-xs font-bold text-slate-700 uppercase mb-2">Monthly Installment Deduction (Rs.) *</label>
+                                <input type="number" id="monthlyDeduction" placeholder="e.g. 10000" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label for="installmentStartDate" class="block text-xs font-bold text-slate-700 uppercase mb-2">Installment Start Date *</label>
+                                <input type="date" id="installmentStartDate" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label for="loanIssueDate" class="block text-xs font-bold text-slate-700 uppercase mb-2">Issue Date *</label>
+                                <input type="date" id="loanIssueDate" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div class="col-span-1 md:col-span-2 lg:col-span-3">
+                                <label for="loanReason" class="block text-xs font-bold text-slate-700 uppercase mb-2">Reason / Remarks</label>
+                                <input type="text" id="loanReason" placeholder="e.g. Medical Emergency, Personal" class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Issue Loan
+                            </button>
+                            <div id="loanMessage" class="text-xs font-semibold"></div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CARD 2: ACTIVE LOANS LEDGER -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-indigo-600"></i> Active Loans Ledger
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Manage and view all current employee active loans and remaining balances.</p>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table id="loansTable" class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Loan ID</th>
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Total Amount</th>
+                                    <th class="p-4">Monthly Installment</th>
+                                    <th class="p-4">Remaining Balance</th>
+                                    <th class="p-4">Installment Start</th>
+                                    <th class="p-4">Issue Date</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loansTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="9" class="p-6 text-center text-slate-400 font-medium">No active loans found.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const AUTH_KEY = 'sys_logged_in_user';
+        let employees = JSON.parse(localStorage.getItem('sys_employees')) || [];
+        let loans = JSON.parse(localStorage.getItem('sys_loans')) || [];
+
+        window.onload = function() {
+            checkAuthStatus();
+            populateLoanEmployeeDropdown();
+            renderLoans();
+        };
+
+        function checkAuthStatus() {
+            const loggedInUser = localStorage.getItem(AUTH_KEY);
+            if (loggedInUser) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('loggedInUserDisplay').innerText = loggedInUser;
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginUserId').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            
+            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+                localStorage.setItem(AUTH_KEY, id);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+                return;
+            }
+            const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
+                               JSON.parse(localStorage.getItem('users')) || 
+                               JSON.parse(localStorage.getItem('sys_clients')) || 
+                               JSON.parse(localStorage.getItem('clients')) || [];
+            const matchedUser = savedUsers.find(user => {
+                const uID = user.userId || user.username || user.user || user.id || user.empID || user.email;
+                const uPass = user.password || user.pass;
+                return uID && uPass && String(uID).trim().toLowerCase() === id.toLowerCase() && String(uPass).trim() === pass;
+            });
+            if (matchedUser) {
+                const displayName = matchedUser.username || matchedUser.userId || matchedUser.name || id;
+                localStorage.setItem(AUTH_KEY, displayName);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(AUTH_KEY);
+            checkAuthStatus();
+        }
+
+        function protectNav(e, pageUrl) {
+            if (!localStorage.getItem(AUTH_KEY)) {
+                e.preventDefault();
+                alert('Please login to access navigation links!');
+                checkAuthStatus();
+            }
+        }
+
+        function populateLoanEmployeeDropdown() {
+            const select = document.getElementById('loanEmpSelect');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Choose Employee --</option>';
+            employees.forEach(emp => {
+                select.innerHTML += `<option value="${emp.empID}">${emp.empID} - ${emp.empName} (${emp.department})</option>`;
+            });
+        }
+
+        document.getElementById('issueLoanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const empID = document.getElementById('loanEmpSelect').value;
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const installment = parseFloat(document.getElementById('monthlyDeduction').value) || 0;
+            const installmentStartDate = document.getElementById('installmentStartDate').value;
+            const issueDate = document.getElementById('loanIssueDate').value;
+            const reason = document.getElementById('loanReason').value;
+            const emp = employees.find(e => e.empID === empID);
+            if(!emp) return;
+
+            const newLoan = {
+                loanID: 'L-' + Math.floor(1000 + Math.random() * 9000),
+                empID: empID,
+                empName: emp.empName,
+                department: emp.department,
+                amount: amount,
+                installment: installment,
+                installmentStartDate: installmentStartDate,
+                remainingBalance: amount,
+                issueDate: issueDate,
+                reason: reason,
+                status: 'Active'
+            };
+            loans.push(newLoan);
+            localStorage.setItem('sys_loans', JSON.stringify(loans));
+            renderLoans();
+            document.getElementById('issueLoanForm').reset();
+            document.getElementById('loanMessage').innerHTML = '<span class="text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 inline-block"><i class="fa-solid fa-circle-check"></i> Loan issued successfully!</span>';
+        });
+
+        function renderLoans() {
+            const tbody = document.getElementById('loansTableBody');
+            if (!loans || loans.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400 font-medium">No active loans found.</td></tr>`;
+                return;
+            }
+            let tHtml = '';
+            loans.forEach((loan, idx) => {
+                const statusBadge = loan.status === 'Active' 
+                    ? '<span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold">Active</span>' 
+                    : '<span class="bg-rose-100 text-rose-700 text-xs px-2.5 py-1 rounded-full font-bold">Inactive</span>';
+                
+                tHtml += `<tr class="hover:bg-slate-50">
+                    <td class="p-4 font-mono text-xs font-semibold text-indigo-600">${loan.loanID}</td>
+                    <td class="p-4"><strong class="text-slate-800">${loan.empName}</strong> <span class="text-xs text-slate-500">(${loan.empID})</span></td>
+                    <td class="p-4 font-semibold text-slate-700">Rs. ${loan.amount.toLocaleString()}</td>
+                    <td class="p-4 font-medium text-slate-600">Rs. ${loan.installment.toLocaleString()}</td>
+                    <td class="p-4 font-bold text-indigo-700">Rs. ${loan.remainingBalance.toLocaleString()}</td>
+                    <td class="p-4 text-slate-500">${loan.installmentStartDate || '-'}</td>
+                    <td class="p-4 text-slate-500">${loan.issueDate}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-center">
+                        <button class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-rose-200 transition flex items-center gap-1 mx-auto" onclick="deleteLoan(${idx})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = tHtml;
+        }
+
+        function deleteLoan(index) {
+            if(confirm('Are you sure you want to delete this loan record?')) {
+                loans.splice(index, 1);
+                localStorage.setItem('sys_loans', JSON.stringify(loans));
+                renderLoans();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Comprehensive Reports</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Horizontal & Vertical Scrollbar / Slide Style for Table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar / Navigation Bar (Matched to Reference Template) -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-calendar-days w-5"></i> Leaves
+                </a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <!-- Active Tab -->
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-indigo-600"></i> Comprehensive Employee & Financial Reports
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                
+                <!-- Tab Switching Bar -->
+                <div class="flex border-b border-slate-200 bg-white rounded-xl shadow-sm p-2 gap-2">
+                    <button class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <i class="fa-solid fa-building"></i> Department Summary
+                    </button>
+                    <button class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Salary Distribution
+                    </button>
+                    <button class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-hand-holding-dollar"></i> Loans & Advances
+                    </button>
+                </div>
+
+                <!-- Quick Summary Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-500">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Employees</h3>
+                        <div class="text-2xl font-bold text-slate-800" id="repTotalEmp">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Active Employees</h3>
+                        <div class="text-2xl font-bold text-slate-800" id="repActiveEmp">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Gross Salaries (Monthly)</h3>
+                        <div class="text-2xl font-bold text-slate-800" id="repTotalSalaries">Rs. 0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Active Loans Balance</h3>
+                        <div class="text-2xl font-bold text-slate-800" id="repTotalLoans">Rs. 0</div>
+                    </div>
+                </div>
+
+                <!-- Main Report Table Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden space-y-2 p-4">
+                    
+                    <!-- Table Header Controls -->
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sitemap text-indigo-600"></i> Department-Wise Breakdown
+                        </h3>
+                        <button onclick="exportToExcel('departmentReportTable', 'Department_Summary_Report')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-download"></i> Export Department Report
+                        </button>
+                    </div>
+
+                    <!-- Scrollable Table Container -->
+                    <div class="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar border border-slate-100 rounded-lg">
+                        <table id="departmentReportTable" class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 font-semibold border-r">Department Name</th>
+                                    <th class="py-3 px-4 font-semibold border-r">Employee Count</th>
+                                    <th class="py-3 px-4 font-semibold">Total Gross Salary (Rs.)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptReportBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                <tr><td colspan="3" class="text-center py-8 text-slate-400 font-medium">No data available.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function loadReportsData() {
+            const employees = JSON.parse(localStorage.getItem('sys_employees')) || [];
+            const loans = JSON.parse(localStorage.getItem('sys_loans')) || [];
+            
+            // Summary Stats Calculations
+            const totalEmp = employees.length;
+            const activeEmp = employees.filter(e => (e.empStatus || 'Active') === 'Active').length;
+            
+            let totalSalaries = 0;
+            employees.forEach(e => {
+                totalSalaries += (parseFloat(e.salary) || 0) + (parseFloat(e.medicalAllowance) || 0) + (parseFloat(e.houseRent) || 0) + (parseFloat(e.specialAllowance) || 0);
+            });
+            
+            let totalLoansBalance = 0;
+            loans.forEach(l => {
+                if(l.status === 'Active') {
+                    totalLoansBalance += (parseFloat(l.remainingBalance) || 0);
+                }
+            });
+            
+            document.getElementById('repTotalEmp').innerText = totalEmp;
+            document.getElementById('repActiveEmp').innerText = activeEmp;
+            document.getElementById('repTotalSalaries').innerText = 'Rs. ' + totalSalaries.toLocaleString();
+            document.getElementById('repTotalLoans').innerText = 'Rs. ' + totalLoansBalance.toLocaleString();
+            
+            // Department-wise Grouping
+            const deptMap = {};
+            employees.forEach(emp => {
+                const dept = emp.department || 'Unassigned';
+                if (!deptMap[dept]) {
+                    deptMap[dept] = { count: 0, salary: 0 };
+                }
+                deptMap[dept].count += 1;
+                deptMap[dept].salary += (parseFloat(emp.salary) || 0) + (parseFloat(emp.medicalAllowance) || 0) + (parseFloat(emp.houseRent) || 0) + (parseFloat(emp.specialAllowance) || 0);
+            });
+            
+            const deptBody = document.getElementById('deptReportBody');
+            const deptKeys = Object.keys(deptMap);
+            
+            if (deptKeys.length === 0) {
+                deptBody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-slate-400 font-medium">No data available.</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            deptKeys.forEach(dept => {
+                html += `<tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="py-3 px-4 font-bold text-slate-800 border-r">${dept}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${deptMap[dept].count}</td>
+                    <td class="py-3 px-4 font-semibold text-xs text-slate-800">Rs. ${deptMap[dept].salary.toLocaleString()}</td>
+                </tr>`;
+            });
+            
+            deptBody.innerHTML = html;
+        }
+
+        function exportToExcel(tableID, filename = '') {
+            const downloadLink = document.createElement("a");
+            const tableSelect = document.getElementById(tableID);
+            if(!tableSelect) return;
+            const tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            downloadLink.href = 'data:application/vnd.ms-excel, ' + tableHTML;
+            downloadLink.download = (filename || 'export') + '.xls';
+            downloadLink.click();
+        }
+        
+        window.onload = loadReportsData;
+    </script>
+</body>
+</html>

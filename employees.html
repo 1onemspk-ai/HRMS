@@ -1,0 +1,1368 @@
+<!DOC<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Employee List & Payroll Management</title>
+    <!-- Tailwind CSS CDN (From Code 1) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons (From Code 1) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (XLSX) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Custom Horizontal & Vertical Scrollbar / Slide Style for Table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar / Navigation Bar (Code 1 Style) -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area (Code 1 Layout) -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-indigo-600"></i> Employee Master & Dropdowns Management
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                
+                <!-- Tab Switching Bar -->
+                <div class="flex border-b border-slate-200 bg-white rounded-xl shadow-sm p-2 gap-2">
+                    <button id="btnTabEmployees" onclick="switchMainTab('employees')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <i class="fa-solid fa-users"></i> Saved Employees Record
+                    </button>
+                    <button id="btnTabSetup" onclick="switchMainTab('setup')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-sliders"></i> ⚙️ Master Dropdown Lists Setup
+                    </button>
+                </div>
+
+                <!-- ================= TAB 1: EMPLOYEE LIST ================= -->
+                <div id="tabEmployeesView" class="space-y-6">
+                    
+                    <!-- Action Bar (Clear All Button Removed) -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Employee Master Directory</h2>
+                            <p class="text-xs text-slate-500">Manage employee personal, job, departmental, and payroll records.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-user-plus"></i> Add Employee
+                            </button>
+                            <button onclick="downloadTemplate()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Template
+                            </button>
+                            <button onclick="document.getElementById('importFile').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-import"></i> Import Excel
+                            </button>
+                            <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls, .csv" onchange="importEmployees(event)">
+                            <button onclick="exportToExcel('employeesTable', 'Employee_Master_List')" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Column Heading Search & Filter Card -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-filter"></i> Advanced Column Search & Filter Options
+                            </h3>
+                            <button onclick="resetHeadingSearch()" class="text-xs text-rose-600 hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Filter
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Search Column</label>
+                                <select id="searchColumn" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="all">-- All Columns --</option>
+                                    <option value="empID">Card / Code</option>
+                                    <option value="empName">Employee Name</option>
+                                    <option value="department">Department</option>
+                                    <option value="section">Section</option>
+                                    <option value="subSection">Sub-Section</option>
+                                    <option value="designation">Designation</option>
+                                    <option value="city">City</option>
+                                    <option value="cnicNumber">CNIC</option>
+                                    <option value="phone">Phone</option>
+                                    <option value="bankName">Bank Name</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Condition</label>
+                                <select id="searchCondition" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="contains">Contains (Shamil hai)</option>
+                                    <option value="equal">Equals (Barabar hai)</option>
+                                    <option value="start">Starts With (Shuru hota hai)</option>
+                                    <option value="end">Ends With (Khatam hota hai)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Search Keyword</label>
+                                <input type="text" id="searchValue" onkeyup="renderEmployeeTable()" placeholder="Type search term..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Filter</label>
+                                <select id="statusFilter" onchange="renderEmployeeTable()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="All">All Statuses</option>
+                                    <option value="Active">🟢 Active Only</option>
+                                    <option value="Inactive">🔴 Inactive Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employee List Table Card with Horizontal & Vertical Slide Controls -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden space-y-2 p-4">
+                        
+                        <!-- Table Header Controls & Slide Buttons -->
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                                Total Employees Displayed: <span id="totalEmpBadge" class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">0</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 font-medium">Table Horizontal Slide Controls:</span>
+                                <button onclick="slideTable('left')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-chevron-left"></i> Slide Left
+                                </button>
+                                <button onclick="slideTable('right')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                    Slide Right <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Horizontal & Vertical Scroll Container (Horizontal + Vertical Slide Enabled) -->
+                        <div id="tableSliderContainer" class="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar border border-slate-100 rounded-lg">
+                            <table id="employeesTable" class="w-full text-left border-collapse min-w-[1200px]">
+                                <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
+                                    <tr class="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200">
+                                        <th class="py-3 px-4 font-semibold border-r">Code</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Name</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Department</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Section</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Sub-Section</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Designation</th>
+                                        <th class="py-3 px-4 font-semibold border-r">City</th>
+                                        <th class="py-3 px-4 font-semibold border-r">CNIC</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Phone</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Bank Name</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Gross Salary</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Status</th>
+                                        <th class="py-3 px-4 font-semibold text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                    <!-- Dynamic rows via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 2: MASTER DROPDOWN SETUP ================= -->
+                <div id="tabSetupView" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="border-b pb-3">
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-indigo-600"></i> Master Dropdown Options Creator
+                            </h2>
+                            <p class="text-xs text-slate-500">Add or manage pre-defined options for Department, Section, Subsection, Designation, Education, University, Nationality, City, and Bank so users can select them easily during Add/Edit Employee.</p>
+                        </div>
+
+                        <!-- Selector for Master List Category -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Select List Category To Edit</label>
+                                <select id="setupCategorySelect" onchange="renderMasterListItems()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="departments">1. Departments</option>
+                                    <option value="sections">2. Sections</option>
+                                    <option value="subsections">3. Sub-Sections</option>
+                                    <option value="designations">4. Designations</option>
+                                    <option value="educations">5. Education Qualifications</option>
+                                    <option value="universities">6. Universities / Institutes</option>
+                                    <option value="nationalities">7. Nationalities</option>
+                                    <option value="cities">8. Cities</option>
+                                    <option value="banks">9. Banks</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Add New Item Name</label>
+                                    <input type="text" id="newMasterItemInput" placeholder="Enter new option (e.g. Accounts / Lahore / Meezan Bank / LUMS)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <button onclick="addMasterListItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-plus"></i> Add Option
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Category Options Table/List -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-3 font-bold text-xs uppercase text-slate-600 flex justify-between items-center">
+                                <span id="currentCategoryTitle">Current Department Options</span>
+                                <span id="masterListCountBadge" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs">0 items</span>
+                            </div>
+                            <ul id="masterItemsList" class="divide-y divide-slate-100 text-sm max-h-96 overflow-y-auto">
+                                <!-- Dynamic List Items -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= ADD EMPLOYEE MODAL (Code 1 Style) ================= -->
+    <div id="addModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 my-8">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-user-plus text-indigo-400"></i> Add New Employee Record</h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="addEmployeeForm" onsubmit="saveNewEmployee(event)" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                
+                <!-- Basic Job & Org Info -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-id-card"></i> Basic & Organizational Info</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Card / Employee Code *</label>
+                            <input type="text" id="addEmpID" required placeholder="e.g. EMP-101" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Employee Name *</label>
+                            <input type="text" id="addEmpName" required placeholder="Full Name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Department *</label>
+                            <select id="addDepartment" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Section</label>
+                            <select id="addSection" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Sub-Section</label>
+                            <select id="addSubSection" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Designation</label>
+                            <select id="addDesignation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">City</label>
+                            <select id="addCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CNIC Number</label>
+                            <input type="text" id="addCnicNumber" placeholder="42101-XXXXXXX-X" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Phone</label>
+                            <input type="text" id="addPhone" placeholder="0300-1234567" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EOBI & SESSI Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-shield-halved"></i> EOBI & SESSI Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Number</label>
+                            <input type="text" id="addEobiNumber" placeholder="EOBI Number" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Check</label>
+                            <select id="addEobiCheck" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Yes">Yes</option><option value="No" selected>No</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">SESSI Check</label>
+                            <select id="addSessiCheck" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Yes">Yes</option><option value="No" selected>No</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exit & Status -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-door-open"></i> Exit & Status Management</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Resignation Date</label>
+                            <input type="date" id="addResignationDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Exit</label>
+                            <input type="date" id="addExitDate" onchange="autoUpdateStatusInAdd()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Status (Auto-Managed)</label>
+                            <select id="addEmpStatus" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700">
+                                <option value="Active" selected>🟢 Active</option>
+                                <option value="Inactive">🔴 Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal & Job Details (With University Field Added) -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-user"></i> Personal & Job Profile</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Father/Husband Name</label>
+                            <input type="text" id="addFatherName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">DOB</label>
+                            <input type="date" id="addDob" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Gender</label>
+                            <select id="addGender" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="">-- Select --</option><option value="Male">Male</option><option value="Female">Female</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Marital Status</label>
+                            <select id="addMaritalStatus" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="">-- Select --</option><option value="Single">Single</option><option value="Married">Married</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Joining (DOJ)</label>
+                            <input type="date" id="addDoj" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Employment Type</label>
+                            <select id="addEmploymentType" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Permanent">Permanent</option><option value="Contract">Contract</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Email</label>
+                            <input type="email" id="addEmail" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nationality</label>
+                            <select id="addNationality" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Highest Education</label>
+                            <select id="addHighestEducation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">University / Institute</label>
+                            <select id="addUniversity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Blood Group</label>
+                            <input type="text" id="addBloodGroup" placeholder="e.g. O+" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Passport Number</label>
+                            <input type="text" id="addPassportNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary & Bank Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-money-bill-wave"></i> Salary & Bank Account Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Base Gross Salary</label>
+                            <input type="number" id="addSalary" placeholder="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">House Rent</label>
+                            <input type="number" id="addHouseRent" placeholder="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Medical Allowance</label>
+                            <input type="number" id="addMedicalAllowance" placeholder="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Special Allowance</label>
+                            <input type="number" id="addSpecialAllowance" placeholder="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">NTN Number</label>
+                            <input type="text" id="addNtnNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Payment Mode</label>
+                            <select id="addPaymentMode" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Bank Name</label>
+                            <select id="addBankName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Branch Code</label>
+                            <input type="text" id="addBankBranchCode" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Account Title</label>
+                            <input type="text" id="addAccountTitle" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IBAN Number</label>
+                            <input type="text" id="addIbanNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency & Address Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-location-dot"></i> Contact & Address</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Emergency Contact Name</label>
+                            <input type="text" id="addEmergencyContactName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Emergency Phone</label>
+                            <input type="text" id="addEmergencyContactPhone" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Current Address</label>
+                            <textarea id="addAddress" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Permanent Address</label>
+                            <textarea id="addPermanentAddress" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= EDIT EMPLOYEE MODAL (Code 1 Style) ================= -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 my-8">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-user-pen text-indigo-400"></i> Edit Employee Record</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="editEmployeeForm" onsubmit="saveEditedEmployee(event)" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                <input type="hidden" id="editIndex">
+
+                <!-- Audit Log Box -->
+                <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-3">
+                    <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider"><i class="fa-solid fa-pen-clip"></i> Audit Tracking Mandatory Info</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Effective Date *</label>
+                            <input type="date" id="editEffectiveDate" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Audit Remarks / Reason *</label>
+                            <input type="text" id="editRemarks" required placeholder="Reason for updating employee record..." class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Job & Org Info -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-id-card"></i> Basic & Organizational Info</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Card / Code (Locked)</label>
+                            <input type="text" id="editEmpID" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Employee Name *</label>
+                            <input type="text" id="editEmpName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Department *</label>
+                            <select id="editDepartment" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Section</label>
+                            <select id="editSection" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Sub-Section</label>
+                            <select id="editSubSection" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Designation</label>
+                            <select id="editDesignation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">City</label>
+                            <select id="editCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CNIC Number</label>
+                            <input type="text" id="editCnicNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Phone</label>
+                            <input type="text" id="editPhone" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EOBI & SESSI Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-shield-halved"></i> EOBI & SESSI Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Number</label>
+                            <input type="text" id="editEobiNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Check</label>
+                            <select id="editEobiCheck" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Yes">Yes</option><option value="No">No</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">SESSI Check</label>
+                            <select id="editSessiCheck" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Yes">Yes</option><option value="No">No</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exit & Status -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-door-open"></i> Exit & Status Management</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Resignation Date</label>
+                            <input type="date" id="editResignationDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Exit</label>
+                            <input type="date" id="editExitDate" onchange="autoUpdateStatusInEdit()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Status (Auto-Managed)</label>
+                            <select id="editEmpStatus" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm font-bold text-slate-700">
+                                <option value="Active">🟢 Active</option>
+                                <option value="Inactive">🔴 Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal & Job Details (With University Field Added) -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-user"></i> Personal & Job Profile</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Father/Husband Name</label>
+                            <input type="text" id="editFatherName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">DOB</label>
+                            <input type="date" id="editDob" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Gender</label>
+                            <select id="editGender" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="">-- Select --</option><option value="Male">Male</option><option value="Female">Female</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Marital Status</label>
+                            <select id="editMaritalStatus" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="">-- Select --</option><option value="Single">Single</option><option value="Married">Married</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Joining (DOJ)</label>
+                            <input type="date" id="editDoj" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Employment Type</label>
+                            <select id="editEmploymentType" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Permanent">Permanent</option><option value="Contract">Contract</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Email</label>
+                            <input type="email" id="editEmail" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nationality</label>
+                            <select id="editNationality" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Highest Education</label>
+                            <select id="editHighestEducation" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">University / Institute</label>
+                            <select id="editUniversity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Blood Group</label>
+                            <input type="text" id="editBloodGroup" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Passport Number</label>
+                            <input type="text" id="editPassportNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary & Bank Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-money-bill-wave"></i> Salary & Bank Account Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Base Gross Salary</label>
+                            <input type="number" id="editSalary" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">House Rent</label>
+                            <input type="number" id="editHouseRent" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Medical Allowance</label>
+                            <input type="number" id="editMedicalAllowance" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Special Allowance</label>
+                            <input type="number" id="editSpecialAllowance" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">NTN Number</label>
+                            <input type="text" id="editNtnNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Payment Mode</label>
+                            <select id="editPaymentMode" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Bank Name</label>
+                            <select id="editBankName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Branch Code</label>
+                            <input type="text" id="editBankBranchCode" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Account Title</label>
+                            <input type="text" id="editAccountTitle" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IBAN Number</label>
+                            <input type="text" id="editIbanNumber" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency & Address Details -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-location-dot"></i> Contact & Address</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Emergency Contact Name</label>
+                            <input type="text" id="editEmergencyContactName" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Emergency Phone</label>
+                            <input type="text" id="editEmergencyContactPhone" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Current Address</label>
+                            <textarea id="editAddress" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Permanent Address</label>
+                            <textarea id="editPermanentAddress" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">Update Employee Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Storage Keys
+        const EMP_STORAGE_KEY = 'sys_employees';
+        const MASTER_LISTS_KEY = 'sys_master_lists_v1';
+
+        // Default Master Dropdown Options (Includes Universities)
+        const defaultMasterLists = {
+            departments: ['IT', 'Human Resources', 'Finance & Accounts', 'Sales & Marketing', 'Operations', 'Supply Chain', 'Quality Assurance'],
+            sections: ['Software Engineering', 'Hardware & Network', 'Talent Acquisition', 'Payroll & Tax', 'General Ledger', 'Logistics'],
+            subsections: ['Frontend Dev', 'Backend Dev', 'Recruitment Ops', 'Taxation', 'Fleet Ops', 'Warehouse'],
+            designations: ['General Manager', 'Manager', 'Assistant Manager', 'Senior Officer', 'Executive Officer', 'Officer', 'Junior Developer', 'Intern'],
+            educations: ['Matriculation', 'Intermediate', 'Bachelors (BS/BBA)', 'Masters (MS/MBA)', 'PhD', 'Diploma / Certification'],
+            universities: ['University of Karachi', 'LUMS', 'NUST', 'FAST-NUCES', 'IBA Karachi', 'NED University', 'University of the Punjab', 'COMSATS'],
+            nationalities: ['Pakistani', 'Overseas Pakistani', 'Foreign National'],
+            cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta', 'Sialkot', 'Gujranwala'],
+            banks: ['Meezan Bank Limited', 'Habib Bank Limited (HBL)', 'United Bank Limited (UBL)', 'MCB Bank', 'Bank Alfalah', 'Allied Bank Limited', 'Standard Chartered Bank', 'Faysal Bank', 'Askari Bank']
+        };
+
+        let employees = JSON.parse(localStorage.getItem(EMP_STORAGE_KEY)) || [];
+        let masterLists = JSON.parse(localStorage.getItem(MASTER_LISTS_KEY)) || defaultMasterLists;
+
+        // Initialize App on load
+        window.onload = function() {
+            // Merge defaults if universities key doesn't exist
+            if (!masterLists.universities) {
+                masterLists.universities = defaultMasterLists.universities;
+            }
+            saveMasterLists();
+            populateAllModalDropdowns();
+            renderEmployeeTable();
+            renderMasterListItems();
+        };
+
+        function saveMasterLists() {
+            localStorage.setItem(MASTER_LISTS_KEY, JSON.stringify(masterLists));
+        }
+
+        // Tab Switching Logic
+        function switchMainTab(tab) {
+            const empView = document.getElementById('tabEmployeesView');
+            const setupView = document.getElementById('tabSetupView');
+            const btnEmp = document.getElementById('btnTabEmployees');
+            const btnSetup = document.getElementById('btnTabSetup');
+
+            if (tab === 'employees') {
+                empView.classList.remove('hidden');
+                setupView.classList.add('hidden');
+                btnEmp.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnSetup.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+                renderEmployeeTable();
+            } else {
+                empView.classList.add('hidden');
+                setupView.classList.remove('hidden');
+                btnSetup.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnEmp.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+                renderMasterListItems();
+            }
+        }
+
+        // Populate Select Dropdowns in Modals dynamically
+        function populateDropdown(elementId, itemsList, defaultText = "-- Select Option --") {
+            const selectEl = document.getElementById(elementId);
+            if (!selectEl) return;
+            selectEl.innerHTML = `<option value="">${defaultText}</option>`;
+            (itemsList || []).forEach(item => {
+                selectEl.innerHTML += `<option value="${item}">${item}</option>`;
+            });
+        }
+
+        function populateAllModalDropdowns() {
+            populateDropdown('addDepartment', masterLists.departments, '-- Select Department --');
+            populateDropdown('addSection', masterLists.sections, '-- Select Section --');
+            populateDropdown('addSubSection', masterLists.subsections, '-- Select Sub-Section --');
+            populateDropdown('addDesignation', masterLists.designations, '-- Select Designation --');
+            populateDropdown('addCity', masterLists.cities, '-- Select City --');
+            populateDropdown('addNationality', masterLists.nationalities, '-- Select Nationality --');
+            populateDropdown('addHighestEducation', masterLists.educations, '-- Select Education --');
+            populateDropdown('addUniversity', masterLists.universities, '-- Select University --');
+            populateDropdown('addBankName', masterLists.banks, '-- Select Bank --');
+
+            populateDropdown('editDepartment', masterLists.departments, '-- Select Department --');
+            populateDropdown('editSection', masterLists.sections, '-- Select Section --');
+            populateDropdown('editSubSection', masterLists.subsections, '-- Select Sub-Section --');
+            populateDropdown('editDesignation', masterLists.designations, '-- Select Designation --');
+            populateDropdown('editCity', masterLists.cities, '-- Select City --');
+            populateDropdown('editNationality', masterLists.nationalities, '-- Select Nationality --');
+            populateDropdown('editHighestEducation', masterLists.educations, '-- Select Education --');
+            populateDropdown('editUniversity', masterLists.universities, '-- Select University --');
+            populateDropdown('editBankName', masterLists.banks, '-- Select Bank --');
+        }
+
+        // Master List Setup Functions
+        function renderMasterListItems() {
+            const category = document.getElementById('setupCategorySelect').value;
+            const items = masterLists[category] || [];
+            const listContainer = document.getElementById('masterItemsList');
+            document.getElementById('currentCategoryTitle').innerText = `Current Options in: ${category.toUpperCase()}`;
+            document.getElementById('masterListCountBadge').innerText = `${items.length} items`;
+            
+            listContainer.innerHTML = '';
+            if (items.length === 0) {
+                listContainer.innerHTML = `<li class="p-4 text-center text-slate-400 italic">No options created yet in this list. Add one above!</li>`;
+                return;
+            }
+
+            items.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.className = "px-4 py-3 flex justify-between items-center hover:bg-slate-50 transition";
+                li.innerHTML = `
+                    <span class="font-semibold text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i> ${item}
+                    </span>
+                    <button onclick="deleteMasterListItem('${category}', ${idx})" class="text-rose-600 hover:text-rose-800 p-1 rounded-md hover:bg-rose-50 transition text-xs font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                `;
+                listContainer.appendChild(li);
+            });
+        }
+
+        function addMasterListItem() {
+            const category = document.getElementById('setupCategorySelect').value;
+            const inputEl = document.getElementById('newMasterItemInput');
+            const val = inputEl.value.trim();
+
+            if (!val) {
+                alert('Please enter an option name.');
+                return;
+            }
+
+            if (!masterLists[category]) masterLists[category] = [];
+            if (masterLists[category].some(item => item.toLowerCase() === val.toLowerCase())) {
+                alert('This item already exists in the list!');
+                return;
+            }
+
+            masterLists[category].push(val);
+            saveMasterLists();
+            populateAllModalDropdowns();
+            renderMasterListItems();
+            inputEl.value = '';
+        }
+
+        function deleteMasterListItem(category, index) {
+            if (confirm('Delete this option from master dropdown lists?')) {
+                masterLists[category].splice(index, 1);
+                saveMasterLists();
+                populateAllModalDropdowns();
+                renderMasterListItems();
+            }
+        }
+
+        // Horizontal Slide Table Scroll Helper
+        function slideTable(direction) {
+            const container = document.getElementById('tableSliderContainer');
+            const scrollAmount = 350;
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        // Heading Search Match Logic
+        function checkSearchMatch(valueStr, searchStr, condition) {
+            val = String(valueStr || '').toLowerCase();
+            target = String(searchStr || '').toLowerCase();
+            if (!target) return true;
+
+            if (condition === 'equal') {
+                return val === target;
+            } else if (condition === 'start') {
+                return val.startsWith(target);
+            } else if (condition === 'end') {
+                return val.endsWith(target);
+            } else {
+                // Default: Contains
+                return val.includes(target);
+            }
+        }
+
+        function resetHeadingSearch() {
+            document.getElementById('searchColumn').value = 'all';
+            document.getElementById('searchCondition').value = 'contains';
+            document.getElementById('searchValue').value = '';
+            document.getElementById('statusFilter').value = 'All';
+            renderEmployeeTable();
+        }
+
+        // Render Employee Master Table
+        function renderEmployeeTable() {
+            const tbody = document.getElementById('userTableBody');
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchCol = document.getElementById('searchColumn').value;
+            const searchCond = document.getElementById('searchCondition').value;
+            const searchVal = document.getElementById('searchValue').value.trim();
+
+            let filtered = employees;
+
+            // Status Filter
+            if (statusFilter !== 'All') {
+                filtered = filtered.filter(e => (e.empStatus || 'Active') === statusFilter);
+            }
+
+            // Advanced Column Heading Search Filter
+            if (searchVal) {
+                filtered = filtered.filter(emp => {
+                    if (searchCol === 'all') {
+                        return checkSearchMatch(emp.empID, searchVal, searchCond) ||
+                               checkSearchMatch(emp.empName, searchVal, searchCond) ||
+                               checkSearchMatch(emp.department, searchVal, searchCond) ||
+                               checkSearchMatch(emp.section, searchVal, searchCond) ||
+                               checkSearchMatch(emp.subSection, searchVal, searchCond) ||
+                               checkSearchMatch(emp.designation, searchVal, searchCond) ||
+                               checkSearchMatch(emp.city, searchVal, searchCond) ||
+                               checkSearchMatch(emp.cnicNumber, searchVal, searchCond) ||
+                               checkSearchMatch(emp.phone, searchVal, searchCond) ||
+                               checkSearchMatch(emp.bankName, searchVal, searchCond);
+                    } else {
+                        return checkSearchMatch(emp[searchCol], searchVal, searchCond);
+                    }
+                });
+            }
+
+            document.getElementById('totalEmpBadge').innerText = filtered.length;
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-400 font-medium">No employee records found matching your query.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((emp) => {
+                const actualIdx = employees.indexOf(emp);
+                const isInactive = (emp.empStatus || 'Active') === 'Inactive';
+                const statusBadge = isInactive 
+                    ? `<span class="px-2.5 py-1 text-xs font-semibold bg-rose-50 text-rose-700 rounded-full border border-rose-200">Inactive</span>`
+                    : `<span class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">Active</span>`;
+                
+                const totalGrossSalary = (parseFloat(emp.salary) || 0) + (parseFloat(emp.houseRent) || 0) + (parseFloat(emp.medicalAllowance) || 0) + (parseFloat(emp.specialAllowance) || 0);
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono font-bold text-indigo-600 border-r text-xs">${emp.empID}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800 border-r">${emp.empName}</td>
+                    <td class="py-3 px-4 border-r text-xs font-semibold text-slate-700">${emp.department || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.section || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.subSection || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.designation || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.city || '-'}</td>
+                    <td class="py-3 px-4 border-r font-mono text-xs text-slate-600">${emp.cnicNumber || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.phone || '-'}</td>
+                    <td class="py-3 px-4 border-r text-xs text-slate-600">${emp.bankName || '-'}</td>
+                    <td class="py-3 px-4 border-r font-semibold text-xs text-slate-800">Rs. ${totalGrossSalary.toLocaleString()}</td>
+                    <td class="py-3 px-4 border-r">${statusBadge}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="openEditModal(${actualIdx})" title="Edit Employee" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition"><i class="fa-solid fa-pen text-xs"></i> Edit</button>
+                            <button onclick="deleteEmployee(${actualIdx})" title="Delete Record" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-md transition"><i class="fa-solid fa-trash-can text-xs"></i> Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Modal Controls
+        function openAddModal() {
+            document.getElementById('addEmployeeForm').reset();
+            populateAllModalDropdowns();
+            document.getElementById('addEmpStatus').value = "Active";
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('flex');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('flex');
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        function autoUpdateStatusInAdd() {
+            const exitVal = document.getElementById('addExitDate').value;
+            document.getElementById('addEmpStatus').value = exitVal ? "Inactive" : "Active";
+        }
+
+        // Security Checked Add Function
+        function saveNewEmployee(e) {
+            e.preventDefault();
+            const empID = document.getElementById('addEmpID').value.trim();
+            const cnicNumber = document.getElementById('addCnicNumber').value.trim();
+
+            // Security Check 1: Duplicate Code / Card ID
+            if (employees.some(emp => emp.empID.toLowerCase() === empID.toLowerCase())) {
+                alert('❌ Security Warning: This Employee Code / Card ID already exists! Duplicate codes are strictly prohibited.');
+                return;
+            }
+
+            // Security Check 2: Duplicate CNIC
+            if (cnicNumber && employees.some(emp => emp.cnicNumber && emp.cnicNumber.trim().toLowerCase() === cnicNumber.toLowerCase())) {
+                alert('❌ Security Warning: An employee with this CNIC Number already exists! Duplicate CNIC numbers are not allowed.');
+                return;
+            }
+
+            const newEmp = {
+                empID: empID,
+                empName: document.getElementById('addEmpName').value.trim(),
+                department: document.getElementById('addDepartment').value,
+                section: document.getElementById('addSection').value,
+                subSection: document.getElementById('addSubSection').value,
+                designation: document.getElementById('addDesignation').value,
+                city: document.getElementById('addCity').value,
+                cnicNumber: cnicNumber,
+                eobiNumber: document.getElementById('addEobiNumber').value.trim(),
+                eobiCheck: document.getElementById('addEobiCheck').value,
+                sessiCheck: document.getElementById('addSessiCheck').value,
+                resignationDate: document.getElementById('addResignationDate').value,
+                exitDate: document.getElementById('addExitDate').value,
+                empStatus: document.getElementById('addExitDate').value ? "Inactive" : "Active",
+                fatherName: document.getElementById('addFatherName').value.trim(),
+                dob: document.getElementById('addDob').value,
+                gender: document.getElementById('addGender').value,
+                maritalStatus: document.getElementById('addMaritalStatus').value,
+                doj: document.getElementById('addDoj').value,
+                employmentType: document.getElementById('addEmploymentType').value,
+                email: document.getElementById('addEmail').value.trim(),
+                phone: document.getElementById('addPhone').value.trim(),
+                nationality: document.getElementById('addNationality').value,
+                bloodGroup: document.getElementById('addBloodGroup').value.trim(),
+                highestEducation: document.getElementById('addHighestEducation').value,
+                university: document.getElementById('addUniversity').value,
+                passportNumber: document.getElementById('addPassportNumber').value.trim(),
+                salary: parseFloat(document.getElementById('addSalary').value) || 0,
+                houseRent: parseFloat(document.getElementById('addHouseRent').value) || 0,
+                medicalAllowance: parseFloat(document.getElementById('addMedicalAllowance').value) || 0,
+                specialAllowance: parseFloat(document.getElementById('addSpecialAllowance').value) || 0,
+                ntnNumber: document.getElementById('addNtnNumber').value.trim(),
+                paymentMode: document.getElementById('addPaymentMode').value,
+                bankName: document.getElementById('addBankName').value,
+                bankBranchCode: document.getElementById('addBankBranchCode').value.trim(),
+                accountTitle: document.getElementById('addAccountTitle').value.trim(),
+                ibanNumber: document.getElementById('addIbanNumber').value.trim(),
+                emergencyContactName: document.getElementById('addEmergencyContactName').value.trim(),
+                emergencyContactPhone: document.getElementById('addEmergencyContactPhone').value.trim(),
+                address: document.getElementById('addAddress').value.trim(),
+                permanentAddress: document.getElementById('addPermanentAddress').value.trim()
+            };
+
+            employees.push(newEmp);
+            localStorage.setItem(EMP_STORAGE_KEY, JSON.stringify(employees));
+            closeAddModal();
+            renderEmployeeTable();
+            alert('Employee record added successfully!');
+        }
+
+        function openEditModal(index) {
+            populateAllModalDropdowns();
+            const emp = employees[index];
+            document.getElementById('editIndex').value = index;
+
+            document.getElementById('editEmpID').value = emp.empID;
+            document.getElementById('editEmpName').value = emp.empName || '';
+            document.getElementById('editDepartment').value = emp.department || '';
+            document.getElementById('editSection').value = emp.section || '';
+            document.getElementById('editSubSection').value = emp.subSection || '';
+            document.getElementById('editDesignation').value = emp.designation || '';
+            document.getElementById('editCity').value = emp.city || '';
+            document.getElementById('editCnicNumber').value = emp.cnicNumber || '';
+            document.getElementById('editEobiNumber').value = emp.eobiNumber || '';
+            document.getElementById('editEobiCheck').value = emp.eobiCheck || 'No';
+            document.getElementById('editSessiCheck').value = emp.sessiCheck || 'No';
+            document.getElementById('editResignationDate').value = emp.resignationDate || '';
+            document.getElementById('editExitDate').value = emp.exitDate || '';
+            document.getElementById('editEmpStatus').value = emp.exitDate ? "Inactive" : "Active";
+
+            document.getElementById('editFatherName').value = emp.fatherName || '';
+            document.getElementById('editDob').value = emp.dob || '';
+            document.getElementById('editGender').value = emp.gender || '';
+            document.getElementById('editMaritalStatus').value = emp.maritalStatus || '';
+            document.getElementById('editDoj').value = emp.doj || '';
+            document.getElementById('editEmploymentType').value = emp.employmentType || '';
+            document.getElementById('editEmail').value = emp.email || '';
+            document.getElementById('editPhone').value = emp.phone || '';
+            document.getElementById('editNationality').value = emp.nationality || '';
+            document.getElementById('editBloodGroup').value = emp.bloodGroup || '';
+            document.getElementById('editHighestEducation').value = emp.highestEducation || '';
+            document.getElementById('editUniversity').value = emp.university || '';
+            document.getElementById('editPassportNumber').value = emp.passportNumber || '';
+            document.getElementById('editSalary').value = emp.salary || 0;
+            document.getElementById('editHouseRent').value = emp.houseRent || 0;
+            document.getElementById('editMedicalAllowance').value = emp.medicalAllowance || 0;
+            document.getElementById('editSpecialAllowance').value = emp.specialAllowance || 0;
+            document.getElementById('editNtnNumber').value = emp.ntnNumber || '';
+            document.getElementById('editPaymentMode').value = emp.paymentMode || '';
+            document.getElementById('editBankName').value = emp.bankName || '';
+            document.getElementById('editBankBranchCode').value = emp.bankBranchCode || '';
+            document.getElementById('editAccountTitle').value = emp.accountTitle || '';
+            document.getElementById('editIbanNumber').value = emp.ibanNumber || '';
+            document.getElementById('editEmergencyContactName').value = emp.emergencyContactName || '';
+            document.getElementById('editEmergencyContactPhone').value = emp.emergencyContactPhone || '';
+            document.getElementById('editAddress').value = emp.address || '';
+            document.getElementById('editPermanentAddress').value = emp.permanentAddress || '';
+            document.getElementById('editEffectiveDate').value = '';
+            document.getElementById('editRemarks').value = '';
+
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('flex');
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function autoUpdateStatusInEdit() {
+            const exitVal = document.getElementById('editExitDate').value;
+            document.getElementById('editEmpStatus').value = exitVal ? "Inactive" : "Active";
+        }
+
+        // Security Checked Edit Function
+        function saveEditedEmployee(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('editIndex').value);
+            const editCnicNumber = document.getElementById('editCnicNumber').value.trim();
+
+            // Security Check: Duplicate CNIC check against other employees
+            if (editCnicNumber && employees.some((emp, idx) => idx !== index && emp.cnicNumber && emp.cnicNumber.trim().toLowerCase() === editCnicNumber.toLowerCase())) {
+                alert('❌ Security Warning: Another employee is already registered with this CNIC Number!');
+                return;
+            }
+
+            employees[index].empName = document.getElementById('editEmpName').value.trim();
+            employees[index].department = document.getElementById('editDepartment').value;
+            employees[index].section = document.getElementById('editSection').value;
+            employees[index].subSection = document.getElementById('editSubSection').value;
+            employees[index].designation = document.getElementById('editDesignation').value;
+            employees[index].city = document.getElementById('editCity').value;
+            employees[index].cnicNumber = editCnicNumber;
+            employees[index].eobiNumber = document.getElementById('editEobiNumber').value.trim();
+            employees[index].eobiCheck = document.getElementById('editEobiCheck').value;
+            employees[index].sessiCheck = document.getElementById('editSessiCheck').value;
+            employees[index].resignationDate = document.getElementById('editResignationDate').value;
+            employees[index].exitDate = document.getElementById('editExitDate').value;
+            employees[index].empStatus = document.getElementById('editExitDate').value ? "Inactive" : "Active";
+            employees[index].fatherName = document.getElementById('editFatherName').value.trim();
+            employees[index].dob = document.getElementById('editDob').value;
+            employees[index].gender = document.getElementById('editGender').value;
+            employees[index].maritalStatus = document.getElementById('editMaritalStatus').value;
+            employees[index].doj = document.getElementById('editDoj').value;
+            employees[index].employmentType = document.getElementById('editEmploymentType').value;
+            employees[index].email = document.getElementById('editEmail').value.trim();
+            employees[index].phone = document.getElementById('editPhone').value.trim();
+            employees[index].nationality = document.getElementById('editNationality').value;
+            employees[index].bloodGroup = document.getElementById('editBloodGroup').value.trim();
+            employees[index].highestEducation = document.getElementById('editHighestEducation').value;
+            employees[index].university = document.getElementById('editUniversity').value;
+            employees[index].passportNumber = document.getElementById('editPassportNumber').value.trim();
+            employees[index].salary = parseFloat(document.getElementById('editSalary').value) || 0;
+            employees[index].houseRent = parseFloat(document.getElementById('editHouseRent').value) || 0;
+            employees[index].medicalAllowance = parseFloat(document.getElementById('editMedicalAllowance').value) || 0;
+            employees[index].specialAllowance = parseFloat(document.getElementById('editSpecialAllowance').value) || 0;
+            employees[index].ntnNumber = document.getElementById('editNtnNumber').value.trim();
+            employees[index].paymentMode = document.getElementById('editPaymentMode').value;
+            employees[index].bankName = document.getElementById('editBankName').value;
+            employees[index].bankBranchCode = document.getElementById('editBankBranchCode').value.trim();
+            employees[index].accountTitle = document.getElementById('editAccountTitle').value.trim();
+            employees[index].ibanNumber = document.getElementById('editIbanNumber').value.trim();
+            employees[index].emergencyContactName = document.getElementById('editEmergencyContactName').value.trim();
+            employees[index].emergencyContactPhone = document.getElementById('editEmergencyContactPhone').value.trim();
+            employees[index].address = document.getElementById('editAddress').value.trim();
+            employees[index].permanentAddress = document.getElementById('editPermanentAddress').value.trim();
+            employees[index].effectiveDate = document.getElementById('editEffectiveDate').value;
+
+            localStorage.setItem(EMP_STORAGE_KEY, JSON.stringify(employees));
+
+            // Audit Logs
+            let auditLogs = JSON.parse(localStorage.getItem('sys_audit_logs')) || [];
+            auditLogs.push({ ...employees[index], actionType: 'EDIT', auditDate: new Date().toISOString(), auditRemarks: document.getElementById('editRemarks').value });
+            localStorage.setItem('sys_audit_logs', JSON.stringify(auditLogs));
+
+            closeEditModal();
+            renderEmployeeTable();
+            alert('Employee record updated successfully!');
+        }
+
+        function deleteEmployee(index) {
+            if (confirm('Are you sure you want to delete this employee record?')) {
+                employees.splice(index, 1);
+                localStorage.setItem(EMP_STORAGE_KEY, JSON.stringify(employees));
+                renderEmployeeTable();
+            }
+        }
+
+        // Excel Template Download
+        function downloadTemplate() {
+            const templateData = [{
+                empID: "EMP-001",
+                empName: "Ali Khan",
+                department: "IT",
+                section: "Software Engineering",
+                subSection: "Frontend Dev",
+                designation: "Senior Developer",
+                city: "Karachi",
+                cnicNumber: "42101-1234567-1",
+                eobiNumber: "EOBI-999",
+                eobiCheck: "Yes",
+                sessiCheck: "No",
+                salary: 50000,
+                houseRent: 20000,
+                medicalAllowance: 5000,
+                specialAllowance: 0,
+                phone: "03001234567",
+                bankName: "Meezan Bank Limited",
+                doj: "2024-01-01"
+            }];
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "EmployeeTemplate");
+            XLSX.writeFile(workbook, "Employee_Import_Template.xlsx");
+        }
+
+        // Import Excel Data
+        function importEmployees(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const importedRows = XLSX.utils.sheet_to_json(worksheet);
+                    let countAdded = 0;
+
+                    importedRows.forEach(row => {
+                        const empID = String(row.empID || row['Card / Code'] || '').trim();
+                        const cnicNumber = String(row.cnicNumber || row['CNIC'] || '').trim();
+
+                        // Duplicate Code or Duplicate CNIC Security Check
+                        const isCodeDuplicate = empID && employees.some(e => e.empID.toLowerCase() === empID.toLowerCase());
+                        const isCnicDuplicate = cnicNumber && employees.some(e => e.cnicNumber && e.cnicNumber.trim().toLowerCase() === cnicNumber.toLowerCase());
+
+                        if (empID && !isCodeDuplicate && !isCnicDuplicate) {
+                            employees.push({
+                                empID: empID,
+                                empName: row.empName || row['Employee Name'] || 'Unknown',
+                                department: row.department || row['Department'] || '',
+                                section: row.section || row['Section'] || '',
+                                subSection: row.subSection || row['Sub-Section'] || row['Sub Section'] || '',
+                                designation: row.designation || row['Designation'] || '',
+                                city: row.city || row['City'] || '',
+                                cnicNumber: cnicNumber,
+                                eobiNumber: row.eobiNumber || row['EOBI Number'] || '',
+                                eobiCheck: row.eobiCheck || row['EOBI Check'] || 'No',
+                                sessiCheck: row.sessiCheck || row['SESSI Check'] || 'No',
+                                resignationDate: row.resignationDate || '',
+                                exitDate: row.exitDate || '',
+                                empStatus: (row.exitDate || row['Date of Exit']) ? "Inactive" : "Active",
+                                fatherName: row.fatherName || '',
+                                dob: row.dob || '',
+                                gender: row.gender || '',
+                                maritalStatus: row.maritalStatus || '',
+                                doj: row.doj || '',
+                                employmentType: row.employmentType || 'Permanent',
+                                email: row.email || '',
+                                phone: row.phone || row['Phone'] || '',
+                                nationality: row.nationality || '',
+                                bloodGroup: row.bloodGroup || '',
+                                highestEducation: row.highestEducation || '',
+                                university: row.university || row['University'] || '',
+                                passportNumber: row.passportNumber || '',
+                                salary: parseFloat(row.salary || row['Base Gross Salary'] || 0),
+                                houseRent: parseFloat(row.houseRent || row['House Rent'] || 0),
+                                medicalAllowance: parseFloat(row.medicalAllowance || row['Medical All.'] || 0),
+                                specialAllowance: parseFloat(row.specialAllowance || row['Special All.'] || 0),
+                                ntnNumber: row.ntnNumber || '',
+                                paymentMode: row.paymentMode || 'Bank Transfer',
+                                bankName: row.bankName || row['Bank Name'] || '',
+                                bankBranchCode: row.bankBranchCode || '',
+                                accountTitle: row.accountTitle || '',
+                                ibanNumber: row.ibanNumber || '',
+                                emergencyContactName: row.emergencyContactName || '',
+                                emergencyContactPhone: row.emergencyContactPhone || '',
+                                address: row.address || '',
+                                permanentAddress: row.permanentAddress || ''
+                            });
+                            countAdded++;
+                        }
+                    });
+
+                    localStorage.setItem(EMP_STORAGE_KEY, JSON.stringify(employees));
+                    renderEmployeeTable();
+                    alert(`Successfully imported ${countAdded} employee records! (Duplicates skipped automatically)`);
+                } catch (err) {
+                    console.error(err);
+                    alert('Error importing file. Please use the provided Excel template format.');
+                }
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Export Table to Excel
+        function exportToExcel(tableID, filename = '') {
+            const downloadLink = document.createElement("a");
+            const tableSelect = document.getElementById(tableID);
+            const tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            downloadLink.href = 'data:application/vnd.ms-excel, ' + tableHTML;
+            downloadLink.download = (filename || 'export') + '.xls';
+            downloadLink.click();
+        }
+    </script>
+</body>
+</html>

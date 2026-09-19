@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HRMS - Payroll Processing & Batch Salary Generation</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    
+    /* Inner Sub-Tabs Styling */
+    .inner-tabcontent { display: none; }
+    .inner-tabcontent.active { display: block; }
+    .inner-tablinks.active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Sticky Action & Selection Columns for Table */
+    .sticky-action {
+      position: sticky;
+      right: 0;
+      z-index: 10;
+      background-color: #ffffff;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+    }
+    .sticky-select {
+      position: sticky;
+      right: 90px;
+      z-index: 10;
+      background-color: #ffffff;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+    }
+    th.sticky-action, th.sticky-select {
+      background-color: #f1f5f9;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+
+  <!-- ================= LOGIN MODAL / SCREEN ================= -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+          <i class="fa-solid fa-users-gear"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
+        <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
+      </div>
+      
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+        <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
+          Invalid User ID or Password!
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Login to System
+        </button>
+      </form>
+      <div class="mt-4 text-center text-xs text-slate-400">
+        Default Credentials: <b>admin</b> / <b>admin123</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP DASHBOARD ================= -->
+  <div id="appContainer" class="hidden flex h-screen overflow-hidden">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+      <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+        <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+      </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+        <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+          <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+        </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+      </nav>
+      <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+        HRMS Enterprise v2.6 &copy; 2026
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+      
+      <!-- Top Header -->
+      <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+        <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-money-bill-wave text-indigo-600"></i> Payroll Processing & Batch Salary Generation
+        </h1>
+        <div class="flex items-center gap-4">
+          <span id="userBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border">
+            Logged in: <b id="loggedInUserDisplay" class="text-indigo-600">Admin</b>
+          </span>
+          <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </button>
+        </div>
+      </header>
+
+      <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+        <!-- MODULE DISPLAY HEADER CARD -->
+        <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400">HRMS Core Module</span>
+            <h2 class="text-2xl font-black mt-1">Payroll Processing Engine</h2>
+            <p class="text-xs text-slate-300 mt-1">Execute batch calculations, manage queue approvals, and export financial records</p>
+          </div>
+          <div class="w-14 h-14 bg-indigo-600/30 border border-indigo-400/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-300">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+        </div>
+
+        <!-- INNER SUB-TABS NAVIGATION -->
+        <div class="flex gap-3 border-b border-slate-200 pb-3">
+          <button class="inner-tablinks active bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2" onclick="switchInnerTab('queueTab', event)">
+            <i class="fa-solid fa-gears"></i> Process & Approval Queue
+          </button>
+          <button class="inner-tablinks bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2" onclick="switchInnerTab('historyTab', event)">
+            <i class="fa-solid fa-folder-open"></i> Generated Payroll Records & Filters
+          </button>
+        </div>
+
+        <!-- TAB 1: Process & Queue -->
+        <div id="queueTab" class="inner-tabcontent active space-y-8">
+          
+          <!-- PROCESS SALARY BATCHES CARD -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-play text-indigo-600"></i> Process Salary Batches
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Choose process type (Active Employees or Individual Employee), Financial Year, Payroll Month, and execute salary calculations.</p>
+            </div>
+
+            <form onsubmit="generatePayrollBatch(event)">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Process For *</label>
+                  <select id="processType" onchange="toggleEmployeeSelect()" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                    <option value="ALL">Active Employees</option>
+                    <option value="INDIVIDUAL">Individual Employee</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee (Code) *</label>
+                  <input type="text" id="singleEmployeeSelect" list="employeeListOptions" placeholder="Search Employee Code" disabled class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 disabled:bg-slate-100 disabled:cursor-not-allowed" />
+                  <datalist id="employeeListOptions"></datalist>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Financial Year *</label>
+                  <select id="financialYearSelect" onchange="populatePayrollMonths()" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                    <option value="">Select Financial Year</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Payroll Month *</label>
+                  <select id="payrollMonth" onchange="updatePayrollDates()" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                    <option value="">Select Financial Year First</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Start Date (Auto) *</label>
+                  <input type="date" id="payrollStart" disabled required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-100 cursor-not-allowed" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-2">End Date (Auto) *</label>
+                  <input type="date" id="payrollEnd" disabled required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-100 cursor-not-allowed" />
+                </div>
+              </div>
+              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                <i class="fa-solid fa-rocket"></i> Run Payroll
+              </button>
+            </form>
+          </div>
+
+          <!-- PAYROLL APPROVAL & ADJUSTMENT QUEUE CARD -->
+          <div class="bg-white p-6 rounded-2xl border-l-4 border-l-indigo-600 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-rotate text-indigo-600"></i> Payroll Approval & Adjustment Queue
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Review, select, and adjust generated payroll items below before final submission.</p>
+              </div>
+              <button type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md flex items-center gap-2" onclick="finalizeAllQueue()">
+                <i class="fa-solid fa-check-double"></i> Finalize Selected
+              </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200 custom-scrollbar">
+              <table class="w-full text-left border-collapse whitespace-nowrap text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                    <th class="p-3">Emp Code</th>
+                    <th class="p-3">Employee Name</th>
+                    <th class="p-3">Division</th>
+                    <th class="p-3">Department</th>
+                    <th class="p-3">Section</th>
+                    <th class="p-3">Designation</th>
+                    <th class="p-3">Emp Type</th>
+                    <th class="p-3">DOJ</th>
+                    <th class="p-3">CNIC</th>
+                    <th class="p-3">Bank</th>
+                    <th class="p-3">Account No</th>
+                    <th class="p-3">Schedule Days</th>
+                    <th class="p-3">Pay Days</th>
+                    <th class="p-3">Present Days</th>
+                    <th class="p-3">Absent Days</th>
+                    <th class="p-3">Leave Days</th>
+                    <th class="p-3">Holidays</th>
+                    <th class="p-3">Off Days</th>
+                    <th class="p-3">Late Count</th>
+                    <th class="p-3">Early Count</th>
+                    <th class="p-3">Half Day Count</th>
+                    <th class="p-3">Basic Salary</th>
+                    <th class="p-3">Medical</th>
+                    <th class="p-3">Gross Salary</th>
+                    <th class="p-3">Benefits</th>
+                    <th class="p-3">Total Allowance</th>
+                    <th class="p-3">Absent Ded.</th>
+                    <th class="p-3">Late Ded.</th>
+                    <th class="p-3">Early Ded.</th>
+                    <th class="p-3">Half Day Ded.</th>
+                    <th class="p-3">Loan / Adv</th>
+                    <th class="p-3">EOBI Ded.</th>
+                    <th class="p-3">Total Deductions</th>
+                    <th class="p-3">Tax (Rs.)</th>
+                    <th class="p-3">Net Salary (Rs.)</th>
+                    <th class="p-3">Salary Status</th>
+                    <th class="p-3">Remarks</th>
+                    <th class="p-3 sticky-select text-center">
+                      <input type="checkbox" id="selectAllQueue" onclick="toggleSelectAllQueue(this)" checked title="Select/Deselect All" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                    </th>
+                    <th class="p-3 sticky-action text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="payroll-queue-tbody" class="divide-y divide-slate-200">
+                  <tr><td colspan="39" class="p-4 text-center text-slate-500 font-medium">No payroll batch in queue. Run payroll above to load records.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: Generated Records & Filters -->
+        <div id="historyTab" class="inner-tabcontent space-y-8">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-list-check text-indigo-600"></i> Generated Payroll Batch Records & Advanced Filters
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Filter, search, and export finalized payroll history items.</p>
+              </div>
+              <button type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md flex items-center gap-2" onclick="executeFilterOrExport()">
+                <i class="fa-solid fa-file-export"></i> Export Payroll Sheet
+              </button>
+            </div>
+            
+            <!-- FILTER CONTROLS TOOLBAR -->
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-filter text-indigo-600"></i> Filter & Export Payroll Records
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Criteria</label>
+                  <select id="filterColumn" onchange="updateFilterValues()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                    <option value="employees">Employees</option>
+                    <option value="cycle">Period / Cycle</option>
+                    <option value="division">Division</option>
+                    <option value="department">Department</option>
+                    <option value="section">Section</option>
+                    <option value="designation">Designation</option>
+                    <option value="empType">Emp Type</option>
+                    <option value="dateOfJoining">DOJ</option>
+                    <option value="cnic">CNIC</option>
+                    <option value="bank">Bank</option>
+                    <option value="accountNumber">Account No</option>
+                    <option value="scheduleDays">Schedule Days</option>
+                    <option value="payDays">Pay Days</option>
+                    <option value="presentDays">Present Days</option>
+                    <option value="absentDays">Absent Days</option>
+                    <option value="leaveDays">Leave Days</option>
+                    <option value="holydays">Holidays</option>
+                    <option value="offDays">Off Days</option>
+                    <option value="lateCount">Late Count</option>
+                    <option value="earlyCount">Early Count</option>
+                    <option value="halfDayCount">Half Day Count</option>
+                    <option value="basic">Basic Salary</option>
+                    <option value="medical">Medical</option>
+                    <option value="grossSalary">Gross Salary</option>
+                    <option value="totalAllowance">Total Allowance</option>
+                    <option value="totalDeductions">Total Deductions</option>
+                    <option value="tax">Tax</option>
+                    <option value="net">Net Salary</option>
+                    <option value="salaryStatus">Salary Status</option>
+                    <option value="status">Status / Remarks</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Value</label>
+                  <select id="filterValueSelect" onchange="applyPayrollFilters()" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                    <option value="ALL">All</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Export Type & Action</label>
+                  <select id="exportTypeSelect" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                    <option value="EXCEL">Excel</option>
+                    <option value="REPORT_EXCEL">Report Type Excel</option>
+                    <option value="PDF">PDF</option>
+                  </select>
+                </div>
+                <div>
+                  <button type="button" class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold p-2.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2" onclick="resetPayrollFilters()">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- HISTORY TABLE -->
+            <div class="overflow-x-auto rounded-xl border border-slate-200 custom-scrollbar">
+              <table class="w-full text-left border-collapse whitespace-nowrap text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                    <th class="p-3">Period / Cycle</th>
+                    <th class="p-3">Emp Code</th>
+                    <th class="p-3">Employee Name</th>
+                    <th class="p-3">Division</th>
+                    <th class="p-3">Department</th>
+                    <th class="p-3">Section</th>
+                    <th class="p-3">Designation</th>
+                    <th class="p-3">Emp Type</th>
+                    <th class="p-3">DOJ</th>
+                    <th class="p-3">CNIC</th>
+                    <th class="p-3">Bank</th>
+                    <th class="p-3">Account No</th>
+                    <th class="p-3">Schedule Days</th>
+                    <th class="p-3">Pay Days</th>
+                    <th class="p-3">Present Days</th>
+                    <th class="p-3">Absent Days</th>
+                    <th class="p-3">Leave Days</th>
+                    <th class="p-3">Holidays</th>
+                    <th class="p-3">Off Days</th>
+                    <th class="p-3">Late Count</th>
+                    <th class="p-3">Early Count</th>
+                    <th class="p-3">Half Day Count</th>
+                    <th class="p-3">Basic Salary</th>
+                    <th class="p-3">Medical</th>
+                    <th class="p-3">Gross Salary</th>
+                    <th class="p-3">Benefits</th>
+                    <th class="p-3">Total Allowance</th>
+                    <th class="p-3">Absent Ded.</th>
+                    <th class="p-3">Late Ded.</th>
+                    <th class="p-3">Early Ded.</th>
+                    <th class="p-3">Half Day Ded.</th>
+                    <th class="p-3">Loan / Adv</th>
+                    <th class="p-3">EOBI Ded.</th>
+                    <th class="p-3">Total Deductions</th>
+                    <th class="p-3">Tax (Rs.)</th>
+                    <th class="p-3">Net Salary (Rs.)</th>
+                    <th class="p-3">Salary Status</th>
+                    <th class="p-3">Status / Remarks</th>
+                    <th class="p-3 sticky-action text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="payroll-table-body" class="divide-y divide-slate-200">
+                  <tr><td colspan="39" class="p-4 text-center text-slate-500 font-medium">No payroll batch processed yet. Select parameters and run payroll.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    const AUTH_KEY = 'sys_logged_in_user';
+
+    window.onload = function() {
+      checkAuthStatus();
+      populateFinancialYears();
+      populateEmployeeDropdown();
+      renderPayrollQueue();
+      renderPayrollHistory();
+      updateFilterValues();
+    };
+
+    function checkAuthStatus() {
+      const loggedInUser = localStorage.getItem(AUTH_KEY);
+      if (loggedInUser) {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('appContainer').classList.remove('hidden');
+        document.getElementById('loggedInUserDisplay').innerText = loggedInUser;
+      } else {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+        document.getElementById('appContainer').classList.add('hidden');
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById('loginUserId').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+      
+      if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+        localStorage.setItem(AUTH_KEY, id);
+        document.getElementById('loginError').classList.add('hidden');
+        checkAuthStatus();
+        return;
+      }
+      const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
+                         JSON.parse(localStorage.getItem('users')) || 
+                         JSON.parse(localStorage.getItem('sys_clients')) || 
+                         JSON.parse(localStorage.getItem('clients')) || [];
+      const matchedUser = savedUsers.find(user => {
+        const uID = user.userId || user.username || user.user || user.id || user.empID || user.email;
+        const uPass = user.password || user.pass;
+        return uID && uPass && String(uID).trim().toLowerCase() === id.toLowerCase() && String(uPass).trim() === pass;
+      });
+      if (matchedUser) {
+        const displayName = matchedUser.username || matchedUser.userId || matchedUser.name || id;
+        localStorage.setItem(AUTH_KEY, displayName);
+        document.getElementById('loginError').classList.add('hidden');
+        checkAuthStatus();
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem(AUTH_KEY);
+      checkAuthStatus();
+    }
+
+    function protectNav(e, pageUrl) {
+      if (!localStorage.getItem(AUTH_KEY)) {
+        e.preventDefault();
+        alert('Please login to access navigation links!');
+        checkAuthStatus();
+      }
+    }
+
+    function switchInnerTab(tabId, evt) {
+      const contents = document.querySelectorAll('.inner-tabcontent');
+      contents.forEach(c => c.classList.remove('active'));
+      const links = document.querySelectorAll('.inner-tablinks');
+      links.forEach(l => l.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (evt) evt.currentTarget.classList.add('active');
+    }
+
+    function formatDate(date) { 
+      const d = new Date(date); 
+      let month = '' + (d.getMonth() + 1); 
+      let day = '' + d.getDate(); 
+      let year = d.getFullYear(); 
+      if (month.length < 2) month = '0' + month; 
+      if (day.length < 2) day = '0' + day; 
+      return [year, month, day].join('-'); 
+    }
+
+    function toggleEmployeeSelect() { 
+      const processType = document.getElementById('processType').value; 
+      const empSelect = document.getElementById('singleEmployeeSelect'); 
+      if (processType === 'INDIVIDUAL') { 
+        empSelect.disabled = false; 
+        empSelect.required = true; 
+      } else { 
+        empSelect.disabled = true; 
+        empSelect.required = false; 
+        empSelect.value = ""; 
+      } 
+    }
+
+    function populateFinancialYears() { 
+      const fySelect = document.getElementById('financialYearSelect'); 
+      let taxYears = JSON.parse(localStorage.getItem('sys_tax_years')) || ["2025-2026", "2026-2027", "2027-2028"]; 
+      let options = '<option value="">Select Financial Year</option>'; 
+      taxYears.forEach(fy => { options += `<option value="${fy}">${fy}</option>`; }); 
+      fySelect.innerHTML = options; 
+    }
+
+    function populatePayrollMonths() { 
+      const fySelect = document.getElementById('financialYearSelect').value; 
+      const monthSelect = document.getElementById('payrollMonth'); 
+      const startInput = document.getElementById('payrollStart'); 
+      const endInput = document.getElementById('payrollEnd'); 
+      startInput.value = ""; 
+      endInput.value = ""; 
+      if (!fySelect) { 
+        monthSelect.innerHTML = '<option value="">Select Financial Year First</option>'; 
+        return; 
+      } 
+      const parts = fySelect.split('-'); 
+      const startYear = parseInt(parts[0]) || 2025; 
+      const endYear = parseInt(parts[1]) || (startYear + 1); 
+      const monthsList = [ 
+        { name: "July " + startYear, y: startYear, m: 6 }, 
+        { name: "August " + startYear, y: startYear, m: 7 }, 
+        { name: "September " + startYear, y: startYear, m: 8 }, 
+        { name: "October " + startYear, y: startYear, m: 9 }, 
+        { name: "November " + startYear, y: startYear, m: 10 }, 
+        { name: "December " + startYear, y: startYear, m: 11 }, 
+        { name: "January " + endYear, y: endYear, m: 0 }, 
+        { name: "February " + endYear, y: endYear, m: 1 }, 
+        { name: "March " + endYear, y: endYear, m: 2 }, 
+        { name: "April " + endYear, y: endYear, m: 3 }, 
+        { name: "May " + endYear, y: endYear, m: 4 }, 
+        { name: "June " + endYear, y: endYear, m: 5 } 
+      ]; 
+      let options = '<option value="">Select Payroll Month</option>'; 
+      monthsList.forEach(item => { 
+        const firstD = new Date(item.y, item.m, 1); 
+        const lastD = new Date(item.y, item.m + 1, 0); 
+        const valStr = formatDate(firstD) + "|" + formatDate(lastD); 
+        options += `<option value="${valStr}">${item.name}</option>`; 
+      }); 
+      monthSelect.innerHTML = options; 
+    }
+
+    function updatePayrollDates() { 
+      const monthSelect = document.getElementById('payrollMonth').value; 
+      const startInput = document.getElementById('payrollStart'); 
+      const endInput = document.getElementById('payrollEnd'); 
+      if (!monthSelect) { startInput.value = ""; endInput.value = ""; return; } 
+      const dates = monthSelect.split('|'); 
+      startInput.value = dates[0]; 
+      endInput.value = dates[1]; 
+    }
+
+    function populateEmployeeDropdown() { 
+      let employees = JSON.parse(localStorage.getItem('sys_employees')) || []; 
+      let activeEmployees = employees.filter(emp => !emp.empStatus || emp.empStatus === 'Active' || emp.status === 'Active'); 
+      const datalist = document.getElementById('employeeListOptions'); 
+      let options = ''; 
+      activeEmployees.forEach(emp => { 
+        const code = emp.empID || emp.code || ''; 
+        const name = emp.empName || emp.name || ''; 
+        options += `<option value="${code}">${code} - ${name}</option>`; 
+      }); 
+      if (datalist) datalist.innerHTML = options; 
+    }
+
+    function generatePayrollBatch(e) {
+      e.preventDefault();
+      const processType = document.getElementById('processType').value;
+      const targetEmpCode = document.getElementById('singleEmployeeSelect').value.trim();
+      const financialYear = document.getElementById('financialYearSelect').value;
+      const payrollMonthSelect = document.getElementById('payrollMonth');
+      const payrollMonthText = payrollMonthSelect.selectedIndex >= 0 ? payrollMonthSelect.options[payrollMonthSelect.selectedIndex].text : 'Monthly';
+      const startDateStr = document.getElementById('payrollStart').value;
+      const endDateStr = document.getElementById('payrollEnd').value;
+      if (!startDateStr || !endDateStr) { alert('Please select Financial Year and Payroll Month.'); return; }
+      if (processType === 'INDIVIDUAL' && !targetEmpCode) { alert('Please select an individual employee code.'); return; }
+      let employees = JSON.parse(localStorage.getItem('sys_employees')) || [];
+      let attendanceRecords = JSON.parse(localStorage.getItem('sys_attendance')) || [];
+      let benefitsRecords = JSON.parse(localStorage.getItem('sys_benefits')) || [];
+      let loansRecords = JSON.parse(localStorage.getItem('sys_loans')) || [];
+      let eobiSessiRules = JSON.parse(localStorage.getItem('sys_eobi_sessi')) || [];
+      let taxSlabs = JSON.parse(localStorage.getItem('sys_slabs')) || [ 
+        { min: 0, max: 600000, rate: 0 }, 
+        { min: 600000, max: 1200000, rate: 5 }, 
+        { min: 1200000, max: 2400000, rate: 15 }, 
+        { min: 2400000, max: 99999999, rate: 25 } 
+      ];
+      let activeEmployees = employees.filter(emp => !emp.empStatus || emp.empStatus === 'Active' || emp.status === 'Active');
+      if (processType === 'INDIVIDUAL') { 
+        activeEmployees = activeEmployees.filter(emp => (emp.empID || emp.code || '') === targetEmpCode || (emp.empName || emp.name || '') === targetEmpCode); 
+      }
+      if (activeEmployees.length === 0) { alert('No active employee found for payroll processing.'); return; }
+      
+      /* DUPLICATE CHECK IN GENERATED RECORDS & FILTERS (HISTORY) */
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      let duplicateEmployees = [];
+      activeEmployees.forEach(emp => {
+        const code = emp.empID || emp.code || '';
+        const name = emp.empName || emp.name || '';
+        let isAlreadyProcessed = payrollHistory.some(hist => {
+          const sameCode = (hist.code === code);
+          const sameDates = (hist.startDate === startDateStr && hist.endDate === endDateStr);
+          const sameCycle = (hist.cycle === payrollMonthText);
+          return sameCode && (sameDates || sameCycle);
+        });
+        if (isAlreadyProcessed) {
+          duplicateEmployees.push(`${code} - ${name}`);
+        }
+      });
+      if (duplicateEmployees.length > 0) {
+        alert(`❌ Alert: Nimnlikhit employee(s) ka is cycle (${payrollMonthText}) ka payroll "Generated Payroll Records & Filters" tab me pehle se process ho chuka hai!\n\n${duplicateEmployees.join('\n')}\n\nJab tak aap Generated Payroll Records tab se is cycle ka record delete nahi karte, tab tak payroll dobara run nahi ho sakta.`);
+        return;
+      }
+      const startD = new Date(startDateStr); 
+      const endD = new Date(endDateStr); 
+      const diffTime = Math.abs(endD - startD); 
+      const totalDaysInRange = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      if (processType === 'INDIVIDUAL') { 
+        payrollQueue = payrollQueue.filter(item => !(item.code === targetEmpCode && item.startDate === startDateStr && item.endDate === endDateStr)); 
+      } else { 
+        payrollQueue = payrollQueue.filter(item => !(item.startDate === startDateStr && item.endDate === endDateStr)); 
+      }
+      activeEmployees.forEach(emp => {
+        const empCode = emp.empID || emp.code || '';
+        const empName = emp.empName || emp.name || 'Unknown';
+        
+        const division = emp.division || 'N/A';
+        const department = emp.department || 'N/A';
+        const section = emp.section || 'N/A';
+        const designation = emp.designation || 'N/A';
+        const empType = emp.empType || emp.type || 'N/A';
+        const dateOfJoining = emp.dateOfJoining || emp.doj || 'N/A';
+        const cnic = emp.cnic || 'N/A';
+        const bank = emp.bank || 'N/A';
+        const accountNumber = emp.accountNumber || emp.accountNo || 'N/A';
+        const dob = emp.dob || emp.dateOfBirth || '';
+        const gender = emp.gender || '';
+        const basic = parseFloat(emp.salary) || parseFloat(emp.basic) || 0;
+        const medical = parseFloat(emp.medicalAllowance) || parseFloat(emp.medical) || 0;
+        const grossSalary = basic + medical;
+        let empBenefits = benefitsRecords.filter(b => (b.code === empCode || b.empID === empCode || b.employeeCode === empCode));
+        let totalBenefitsAmount = 0;
+        let benefitsBreakdown = {};
+        empBenefits.forEach(b => {
+          let bName = b.benefitName || b.name || b.columnName || 'Benefit';
+          let bAmt = parseFloat(b.amount) || parseFloat(b.value) || 0;
+          benefitsBreakdown[bName] = bAmt;
+          totalBenefitsAmount += bAmt;
+        });
+        const totalAllowance = grossSalary + totalBenefitsAmount;
+        let att = attendanceRecords.find(a => (a.code === empCode || a.empID === empCode || a.name === empName || a.employeeName === empName)) || {};
+        const scheduleDays = parseFloat(att.totalDays) || parseFloat(att.scheduleDays) || totalDaysInRange;
+        const payDays = parseFloat(att.payDays) || parseFloat(att.presentDays) || scheduleDays;
+        const presentDays = parseFloat(att.presentDays) || 0;
+        const absentDays = parseFloat(att.absentDays) || 0;
+        const leaveDays = parseFloat(att.leaveDays) || 0;
+        const holydays = parseFloat(att.holydays) || parseFloat(att.holidays) || 0;
+        const offDays = parseFloat(att.offDays) || 0;
+        const lateCount = parseFloat(att.late) || parseFloat(att.lateCount) || 0;
+        const earlyCount = parseFloat(att.early) || parseFloat(att.earlyCount) || 0;
+        const halfDayCount = parseFloat(att.halfDay) || parseFloat(att.halfDays) || 0;
+        const lateDeductionUnits = parseFloat(att.lateDeduction) || lateCount;
+        const earlyDeductionUnits = parseFloat(att.earlyDeduction) || earlyCount;
+        const monthlyDays = scheduleDays > 0 ? scheduleDays : 30;
+        const absentAmount = (grossSalary / monthlyDays) * absentDays;
+        const lateAmount = (grossSalary / monthlyDays) * lateDeductionUnits;
+        const earlyAmount = (grossSalary / monthlyDays) * earlyDeductionUnits;
+        const halfDayAmount = (grossSalary / monthlyDays) * 0.5 * halfDayCount;
+        let empLoans = loansRecords.filter(l => (l.code === empCode || l.empID === empCode || l.employeeCode === empCode) && (!l.status || l.status === 'Active' || l.status === 'Approved'));
+        let loanInstallment = 0; let advanceAmount = 0;
+        empLoans.forEach(l => { 
+          loanInstallment += parseFloat(l.installment) || parseFloat(l.monthlyDeduction) || 0; 
+          advanceAmount += parseFloat(l.advance) || parseFloat(l.advanceAmount) || 0; 
+        });
+        let eobiDeduction = 0;
+        let eobiRule = eobiSessiRules.find(r => r.type === 'EOBI') || { rate: 1, minSalary: 0 };
+        let isEligibleEOBI = true;
+        if (dob) { 
+          const birthYear = new Date(dob).getFullYear(); 
+          const currentYear = new Date().getFullYear(); 
+          const age = currentYear - birthYear; 
+          if (gender.toLowerCase() === 'female' && age >= 55) isEligibleEOBI = false; 
+          if (gender.toLowerCase() === 'male' && age >= 60) isEligibleEOBI = false; 
+        }
+        if (isEligibleEOBI) { 
+          eobiDeduction = parseFloat(eobiRule.fixedAmount) || (basic * (parseFloat(eobiRule.rate) || 1) / 100) || 0; 
+        }
+        const totalDeductions = absentAmount + lateAmount + earlyAmount + halfDayAmount + loanInstallment + advanceAmount + eobiDeduction;
+        let earnedGross = scheduleDays > 0 ? (grossSalary / scheduleDays) * payDays : grossSalary;
+        const annualGross = grossSalary * 12;
+        let annualTax = 0; 
+        for (let slab of taxSlabs) { 
+          if (annualGross >= slab.min && annualGross <= slab.max) { 
+            annualTax = (annualGross * slab.rate) / 100; 
+            break; 
+          } 
+        }
+        let monthlyTax = annualTax / 12;
+        let netSalary = (earnedGross + totalBenefitsAmount) - totalDeductions - monthlyTax;
+        if (netSalary < 0) netSalary = 0;
+        const recordId = 'PAY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        payrollQueue.push({ 
+          id: recordId, 
+          startDate: startDateStr, 
+          endDate: endDateStr, 
+          cycle: payrollMonthText, 
+          financialYear: financialYear, 
+          code: empCode, 
+          name: empName, 
+          division: division, 
+          department: department, 
+          section: section, 
+          designation: designation, 
+          empType: empType, 
+          dateOfJoining: dateOfJoining, 
+          cnic: cnic, 
+          bank: bank, 
+          accountNumber: accountNumber, 
+          basic: basic, 
+          medical: medical, 
+          grossSalary: grossSalary, 
+          benefitsBreakdown: benefitsBreakdown, 
+          totalBenefitsAmount: totalBenefitsAmount, 
+          totalAllowance: totalAllowance, 
+          scheduleDays: scheduleDays, 
+          payDays: payDays, 
+          presentDays: presentDays, 
+          absentDays: absentDays, 
+          leaveDays: leaveDays, 
+          holydays: holydays, 
+          offDays: offDays, 
+          lateCount: lateCount, 
+          earlyCount: earlyCount, 
+          halfDayCount: halfDayCount, 
+          absentAmount: Math.round(absentAmount), 
+          lateAmount: Math.round(lateAmount), 
+          earlyAmount: Math.round(earlyAmount), 
+          halfDayAmount: Math.round(halfDayAmount), 
+          loanInstallment: Math.round(loanInstallment), 
+          advanceAmount: Math.round(advanceAmount), 
+          eobiDeduction: Math.round(eobiDeduction), 
+          totalDeductions: Math.round(totalDeductions), 
+          earnedGross: Math.round(earnedGross), 
+          tax: Math.round(monthlyTax), 
+          net: Math.round(netSalary), 
+          salaryStatus: 'Released', 
+          status: 'In Queue', 
+          remarks: '',
+          selected: true
+        });
+      });
+      localStorage.setItem('sys_payroll_queue', JSON.stringify(payrollQueue));
+      renderPayrollQueue();
+      alert(`Payroll generated successfully!`);
+    }
+
+    function renderPayrollQueue() {
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      const tbody = document.getElementById('payroll-queue-tbody');
+      if (payrollQueue.length === 0) { 
+        tbody.innerHTML = `<tr><td colspan="39" class="p-4 text-center text-slate-500 font-medium">No payroll batch in queue. Run payroll above to load records.</td></tr>`; 
+        return; 
+      }
+      let html = '';
+      payrollQueue.forEach((row, index) => {
+        const benefitsStr = Object.entries(row.benefitsBreakdown || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'None';
+        const isChecked = row.selected !== false ? 'checked' : '';
+        html += `<tr class="hover:bg-slate-50">
+          <td class="p-2"><input type="text" id="q_code_${index}" value="${row.code || ''}" class="w-16 p-1 border rounded bg-slate-100 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_name_${index}" value="${row.name || ''}" class="w-24 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_division_${index}" value="${row.division || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_dept_${index}" value="${row.department || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_sec_${index}" value="${row.section || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_desig_${index}" value="${row.designation || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_emptype_${index}" value="${row.empType || ''}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_doj_${index}" value="${row.dateOfJoining || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_cnic_${index}" value="${row.cnic || ''}" class="w-24 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_bank_${index}" value="${row.bank || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="text" id="q_acc_${index}" value="${row.accountNumber || ''}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_schdays_${index}" value="${row.scheduleDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_paydays_${index}" value="${row.payDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_pres_${index}" value="${row.presentDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_abs_${index}" value="${row.absentDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_leave_${index}" value="${row.leaveDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_hol_${index}" value="${row.holydays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_off_${index}" value="${row.offDays}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_late_${index}" value="${row.lateCount}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_early_${index}" value="${row.earlyCount}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_half_${index}" value="${row.halfDayCount}" class="w-14 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_basic_${index}" value="${row.basic}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_med_${index}" value="${row.medical}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_gross_${index}" value="${row.grossSalary}" class="w-20 p-1 border rounded bg-slate-50 text-xs font-bold" disabled /></td>
+          <td class="p-2"><input type="text" id="q_ben_${index}" value="${benefitsStr}" class="w-24 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_totallow_${index}" value="${row.totalAllowance}" class="w-20 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_absamt_${index}" value="${row.absentAmount}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_lateamt_${index}" value="${row.lateAmount}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_earlyamt_${index}" value="${row.earlyAmount}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_halfamt_${index}" value="${row.halfDayAmount}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_loan_${index}" value="${row.loanInstallment + row.advanceAmount}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_eobi_${index}" value="${row.eobiDeduction}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_ded_${index}" value="${row.totalDeductions}" class="w-20 p-1 border rounded bg-slate-50 text-xs font-bold text-rose-600" disabled /></td>
+          <td class="p-2"><input type="number" id="q_tax_${index}" value="${row.tax}" class="w-16 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2"><input type="number" id="q_net_${index}" value="${row.net}" class="w-20 p-1 border rounded bg-slate-50 text-xs font-bold text-emerald-600" disabled /></td>
+          <td class="p-2">
+            <select id="q_status_${index}" class="w-20 p-1 border rounded bg-slate-50 text-xs font-semibold" disabled>
+              <option value="Released" ${row.salaryStatus === 'Released' ? 'selected' : ''}>Released</option>
+              <option value="Stopped" ${row.salaryStatus === 'Stopped' ? 'selected' : ''}>Stopped</option>
+            </select>
+          </td>
+          <td class="p-2"><input type="text" id="q_remarks_${index}" value="${row.remarks || ''}" placeholder="Remarks..." class="w-28 p-1 border rounded bg-slate-50 text-xs" disabled /></td>
+          <td class="p-2 sticky-select text-center">
+            <input type="checkbox" class="queue-checkbox rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" data-index="${index}" ${isChecked} onchange="updateQueueSelection(${index}, this.checked)" />
+          </td>
+          <td class="p-2 sticky-action text-center">
+            <button type="button" id="edit_btn_${index}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 py-1 rounded text-xs transition" onclick="enableQueueEdit(${index})">✏️ Edit</button>
+            <button type="button" id="save_btn_${index}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-xs transition hidden" onclick="saveQueueEdit(${index})">💾 Save</button>
+          </td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+      
+      const allCBs = document.querySelectorAll('.queue-checkbox');
+      if (allCBs.length > 0) {
+        const master = document.getElementById('selectAllQueue');
+        if (master) master.checked = Array.from(allCBs).every(cb => cb.checked);
+      }
+    }
+
+    function toggleSelectAllQueue(masterCheckbox) {
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      payrollQueue.forEach(item => {
+        item.selected = masterCheckbox.checked;
+      });
+      localStorage.setItem('sys_payroll_queue', JSON.stringify(payrollQueue));
+      const checkboxes = document.querySelectorAll('.queue-checkbox');
+      checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    }
+
+    function updateQueueSelection(index, isChecked) {
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      if (payrollQueue[index]) {
+        payrollQueue[index].selected = isChecked;
+        localStorage.setItem('sys_payroll_queue', JSON.stringify(payrollQueue));
+      }
+      const allCBs = document.querySelectorAll('.queue-checkbox');
+      const master = document.getElementById('selectAllQueue');
+      if (master) master.checked = Array.from(allCBs).every(cb => cb.checked);
+    }
+
+    function enableQueueEdit(index) { 
+      const rowInputs = document.querySelectorAll(`[id^="q_"][id$="_${index}"]`);
+      rowInputs.forEach(el => {
+        if (el.id !== `q_code_${index}`) { 
+          el.disabled = false;
+          el.classList.remove('bg-slate-50');
+          el.classList.add('bg-white', 'ring-2', 'ring-indigo-300');
+        }
+      });
+      document.getElementById(`edit_btn_${index}`).classList.add('hidden'); 
+      document.getElementById(`save_btn_${index}`).classList.remove('hidden'); 
+    }
+
+    function saveQueueEdit(index) {
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      const item = payrollQueue[index];
+      const remarks = document.getElementById(`q_remarks_${index}`).value.trim();
+      
+      if (!remarks) { 
+        alert('Remarks are required to save changes!'); 
+        document.getElementById(`q_remarks_${index}`).focus(); 
+        return; 
+      }
+      item.name = document.getElementById(`q_name_${index}`).value;
+      item.division = document.getElementById(`q_division_${index}`).value;
+      item.department = document.getElementById(`q_dept_${index}`).value;
+      item.section = document.getElementById(`q_sec_${index}`).value;
+      item.designation = document.getElementById(`q_desig_${index}`).value;
+      item.empType = document.getElementById(`q_emptype_${index}`).value;
+      item.dateOfJoining = document.getElementById(`q_doj_${index}`).value;
+      item.cnic = document.getElementById(`q_cnic_${index}`).value;
+      item.bank = document.getElementById(`q_bank_${index}`).value;
+      item.accountNumber = document.getElementById(`q_acc_${index}`).value;
+      
+      item.scheduleDays = parseFloat(document.getElementById(`q_schdays_${index}`).value) || 0;
+      item.payDays = parseFloat(document.getElementById(`q_paydays_${index}`).value) || 0;
+      item.presentDays = parseFloat(document.getElementById(`q_pres_${index}`).value) || 0;
+      item.absentDays = parseFloat(document.getElementById(`q_abs_${index}`).value) || 0;
+      item.leaveDays = parseFloat(document.getElementById(`q_leave_${index}`).value) || 0;
+      item.holydays = parseFloat(document.getElementById(`q_hol_${index}`).value) || 0;
+      item.offDays = parseFloat(document.getElementById(`q_off_${index}`).value) || 0;
+      item.lateCount = parseFloat(document.getElementById(`q_late_${index}`).value) || 0;
+      item.earlyCount = parseFloat(document.getElementById(`q_early_${index}`).value) || 0;
+      item.halfDayCount = parseFloat(document.getElementById(`q_half_${index}`).value) || 0;
+      item.basic = parseFloat(document.getElementById(`q_basic_${index}`).value) || 0;
+      item.medical = parseFloat(document.getElementById(`q_med_${index}`).value) || 0;
+      item.grossSalary = parseFloat(document.getElementById(`q_gross_${index}`).value) || (item.basic + item.medical);
+      
+      item.totalAllowance = parseFloat(document.getElementById(`q_totallow_${index}`).value) || 0;
+      item.absentAmount = parseFloat(document.getElementById(`q_absamt_${index}`).value) || 0;
+      item.lateAmount = parseFloat(document.getElementById(`q_lateamt_${index}`).value) || 0;
+      item.earlyAmount = parseFloat(document.getElementById(`q_earlyamt_${index}`).value) || 0;
+      item.halfDayAmount = parseFloat(document.getElementById(`q_halfamt_${index}`).value) || 0;
+      item.eobiDeduction = parseFloat(document.getElementById(`q_eobi_${index}`).value) || 0;
+      item.totalDeductions = parseFloat(document.getElementById(`q_ded_${index}`).value) || 0;
+      item.tax = parseFloat(document.getElementById(`q_tax_${index}`).value) || 0;
+      item.net = parseFloat(document.getElementById(`q_net_${index}`).value) || 0;
+      item.salaryStatus = document.getElementById(`q_status_${index}`).value;
+      item.remarks = remarks;
+      localStorage.setItem('sys_payroll_queue', JSON.stringify(payrollQueue));
+      renderPayrollQueue();
+      alert('Changes saved successfully!');
+    }
+
+    function finalizeAllQueue() {
+      let payrollQueue = JSON.parse(localStorage.getItem('sys_payroll_queue')) || [];
+      if (payrollQueue.length === 0) { alert('No payroll records.'); return; }
+      
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      let remainingQueue = [];
+      let finalizedCount = 0;
+      let stoppedCount = 0;
+      let unselectedCount = 0;
+      payrollQueue.forEach(item => {
+        if (!item.id) {
+          item.id = 'PAY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        }
+        if (item.selected === false) {
+          unselectedCount++;
+          remainingQueue.push(item);
+        } else if (item.salaryStatus === 'Stopped') {
+          stoppedCount++;
+          remainingQueue.push(item);
+        } else {
+          finalizedCount++;
+          item.status = 'Processed';
+          payrollHistory.push(item);
+        }
+      });
+      localStorage.setItem('sys_payroll_history', JSON.stringify(payrollHistory));
+      localStorage.setItem('sys_payroll_queue', JSON.stringify(remainingQueue));
+      renderPayrollQueue(); 
+      renderPayrollHistory();
+      updateFilterValues();
+      
+      alert(`Finalized: ${finalizedCount} selected records.\nSkipped (Salary Stopped): ${stoppedCount} records.\nSkipped (Unchecked): ${unselectedCount} records.`);
+    }
+
+    function renderPayrollHistory(filteredData = null) {
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      
+      let historyUpdated = false;
+      payrollHistory.forEach(item => {
+        if (!item.id) {
+          item.id = 'PAY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+          historyUpdated = true;
+        }
+      });
+      if (historyUpdated) {
+        localStorage.setItem('sys_payroll_history', JSON.stringify(payrollHistory));
+      }
+      let displayList = filteredData || payrollHistory;
+      const tbody = document.getElementById('payroll-table-body');
+      if (displayList.length === 0) { 
+        tbody.innerHTML = `<tr><td colspan="39" class="p-4 text-center text-slate-500 font-medium">No history records found.</td></tr>`; 
+        return; 
+      }
+      let html = '';
+      displayList.forEach((row) => {
+        const benefitsStr = Object.entries(row.benefitsBreakdown || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'None';
+        html += `<tr class="hover:bg-slate-50">
+          <td class="p-3"><b>${row.startDate}</b><br><span class="text-xs text-slate-400">${row.cycle}</span></td>
+          <td class="p-3 font-semibold text-slate-700">${row.code || 'N/A'}</td>
+          <td class="p-3 font-bold text-slate-900">${row.name}</td>
+          <td class="p-3">${row.division}</td>
+          <td class="p-3">${row.department}</td>
+          <td class="p-3">${row.section}</td>
+          <td class="p-3">${row.designation}</td>
+          <td class="p-3">${row.empType}</td>
+          <td class="p-3">${row.dateOfJoining}</td>
+          <td class="p-3">${row.cnic}</td>
+          <td class="p-3">${row.bank}</td>
+          <td class="p-3">${row.accountNumber}</td>
+          <td class="p-3">${row.scheduleDays}</td>
+          <td class="p-3">${row.payDays}</td>
+          <td class="p-3">${row.presentDays}</td>
+          <td class="p-3">${row.absentDays}</td>
+          <td class="p-3">${row.leaveDays}</td>
+          <td class="p-3">${row.holydays}</td>
+          <td class="p-3">${row.offDays}</td>
+          <td class="p-3">${row.lateCount}</td>
+          <td class="p-3">${row.earlyCount}</td>
+          <td class="p-3">${row.halfDayCount}</td>
+          <td class="p-3 font-semibold">Rs. ${Number(row.basic).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.medical).toLocaleString()}</td>
+          <td class="p-3 font-bold text-slate-900">Rs. ${Number(row.grossSalary).toLocaleString()}</td>
+          <td class="p-3 text-xs text-slate-500">${benefitsStr}</td>
+          <td class="p-3">Rs. ${Number(row.totalAllowance).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.absentAmount).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.lateAmount).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.earlyAmount).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.halfDayAmount).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.loanInstallment + row.advanceAmount).toLocaleString()}</td>
+          <td class="p-3">Rs. ${Number(row.eobiDeduction).toLocaleString()}</td>
+          <td class="p-3 font-bold text-rose-600">Rs. ${Number(row.totalDeductions).toLocaleString()}</td>
+          <td class="p-3 text-indigo-600 font-semibold">Rs. ${Number(row.tax).toLocaleString()}</td>
+          <td class="p-3 font-black text-emerald-600 text-sm">Rs. ${Number(row.net).toLocaleString()}</td>
+          <td class="p-3"><span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-bold">${row.salaryStatus || 'Released'}</span></td>
+          <td class="p-3"><span class="text-emerald-600 font-bold">🟢 ${row.status}</span><br><span class="text-xs text-slate-400">${row.remarks || ''}</span></td>
+          <td class="p-3 sticky-action text-center">
+            <button type="button" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded text-xs border border-rose-200 transition flex items-center gap-1 mx-auto" onclick="deletePayrollHistoryRecord('${row.id}')">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function updateFilterValues() {
+      const col = document.getElementById('filterColumn').value;
+      const valSelect = document.getElementById('filterValueSelect');
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      
+      let optionsHtml = '<option value="ALL">All</option>';
+      let uniqueVals = [];
+      
+      if (col === 'employees') {
+        uniqueVals = [...new Set(payrollHistory.map(item => String(item.name || 'N/A')))].sort();
+      } else {
+        uniqueVals = [...new Set(payrollHistory.map(item => String(item[col] || 'N/A')))].sort();
+      }
+      uniqueVals.forEach(val => {
+        if (val) {
+          optionsHtml += `<option value="${val}">${val}</option>`;
+        }
+      });
+      valSelect.innerHTML = optionsHtml;
+      applyPayrollFilters();
+    }
+
+    function applyPayrollFilters() {
+      const col = document.getElementById('filterColumn').value;
+      const specificVal = document.getElementById('filterValueSelect').value;
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      let filtered = payrollHistory.filter(row => {
+        let matchesSpecific = true;
+        if (specificVal !== 'ALL') {
+          if (col === 'employees') {
+            matchesSpecific = String(row.name || 'N/A') === specificVal;
+          } else {
+            matchesSpecific = String(row[col] || 'N/A') === specificVal;
+          }
+        }
+        return matchesSpecific;
+      });
+      renderPayrollHistory(filtered);
+    }
+
+    function resetPayrollFilters() {
+      document.getElementById('filterColumn').value = 'employees';
+      updateFilterValues();
+    }
+
+    function executeFilterOrExport() {
+      const exportType = document.getElementById('exportTypeSelect').value;
+      applyPayrollFilters();
+      if (exportType === 'EXCEL') {
+        exportPayrollSheet();
+      } else if (exportType === 'REPORT_EXCEL') {
+        alert('Report Type Excel format generated successfully!');
+        exportPayrollSheet();
+      } else if (exportType === 'PDF') {
+        alert('PDF Export initiated successfully!');
+        window.print();
+      }
+    }
+
+    function exportPayrollSheet() {
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      if (payrollHistory.length === 0) {
+        alert('No payroll records available to export.');
+        return;
+      }
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Cycle,Emp Code,Name,Department,Designation,Basic Salary,Gross Salary,Total Deductions,Net Salary,Status\r\n";
+      payrollHistory.forEach(row => {
+        csvContent += `"${row.cycle}","${row.code}","${row.name}","${row.department}","${row.designation}",${row.basic},${row.grossSalary},${row.totalDeductions},${row.net},"${row.status}"\r\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "payroll_sheet.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function deletePayrollHistoryRecord(recordId) {
+      let confirm1 = confirm("⚠️ Popup 1/2: Are you sure you want to delete this finalized payroll record? Deleting will allow regenerating payroll for this period.");
+      if (!confirm1) return;
+      let remarks = prompt("📝 Popup 2/2: Mandatory Remarks - Please enter the exact reason/remarks for deleting this payroll record:");
+      if (remarks === null) return;
+      remarks = remarks.trim();
+      if (!remarks) {
+        alert("Action aborted: Remarks are strictly mandatory to delete a payroll record!");
+        return;
+      }
+      let payrollHistory = JSON.parse(localStorage.getItem('sys_payroll_history')) || [];
+      const recordIndex = payrollHistory.findIndex(item => item.id === recordId);
+      if (recordIndex === -1) {
+        alert("Record not found!");
+        return;
+      }
+      const deletedItem = payrollHistory.splice(recordIndex, 1)[0];
+      localStorage.setItem('sys_payroll_history', JSON.stringify(payrollHistory));
+      let auditLogs = JSON.parse(localStorage.getItem('sys_audit')) || JSON.parse(localStorage.getItem('sys_audit_logs')) || [];
+      auditLogs.push({
+        timestamp: new Date().toLocaleString(),
+        action: "Deleted Generated Payroll Record",
+        module: "Payroll Processing",
+        details: `Deleted payroll record for Employee: ${deletedItem.name} (Code: ${deletedItem.code}) for Period: ${deletedItem.startDate} to ${deletedItem.endDate}`,
+        remarks: remarks
+      });
+      localStorage.setItem('sys_audit', JSON.stringify(auditLogs));
+      localStorage.setItem('sys_audit_logs', JSON.stringify(auditLogs));
+      updateFilterValues();
+      alert("Payroll record successfully deleted and audit log recorded!");
+    }
+  </script>
+</body>
+</html>

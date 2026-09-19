@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - HRMS Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar / Navigation Bar -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm custom-scrollbar">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <!-- Active Audit Logs Tab -->
+                <a href="audit.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-indigo-600"></i> System Audit Trail & Logs
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                
+                <!-- Action Bar / Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="relative flex-1 md:w-80">
+                            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="searchAudit" onkeyup="filterAuditLogs()" placeholder="Search by narration, user, or module..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="clearAuditLogs()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i> Clear All Logs
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Audit Log Table Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 border-b bg-slate-50 font-bold text-slate-700 flex justify-between items-center">
+                        <span>Activity History Track</span>
+                        <span id="logCount" class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full">0 Entries Found</span>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider border-b">
+                                    <th class="p-3.5 font-semibold">Timestamp</th>
+                                    <th class="p-3.5 font-semibold">User Name</th>
+                                    <th class="p-3.5 font-semibold">Module</th>
+                                    <th class="p-3.5 font-semibold">Action</th>
+                                    <th class="p-3.5 font-semibold">Auto Narration</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody" class="divide-y divide-slate-200 text-slate-700">
+                                <!-- Dynamic rows will load here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript to Handle Global Audit Logging & UI Rendering -->
+    <script>
+        // Global Helper Function that other pages can call to log any activity
+        function logAction(moduleName, actionType, narrationText) {
+            let logs = JSON.parse(localStorage.getItem('sys_audit_logs')) || [];
+            
+            const newLog = {
+                timestamp: new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'medium' }),
+                username: "admin@hrms.com", // You can replace this dynamically with logged-in user variable
+                module: moduleName,
+                action: actionType, // ADD, EDIT, UPDATE, DELETE
+                narration: narrationText
+            };
+
+            logs.unshift(newLog); // Add latest log at the top
+            localStorage.setItem('sys_audit_logs', JSON.stringify(logs));
+        }
+
+        // Load and Render Logs on Page Load
+        function loadAuditLogs() {
+            const logs = JSON.parse(localStorage.getItem('sys_audit_logs')) || [];
+            const tbody = document.getElementById('auditTableBody');
+            const logCount = document.getElementById('logCount');
+            
+            tbody.innerHTML = '';
+            logCount.innerText = `${logs.length} Entries Found`;
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 italic">No activity logs recorded yet. Perform actions across modules to see them here.</td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                let badgeColor = 'bg-slate-100 text-slate-700';
+                if(log.action.toUpperCase() === 'ADD' || log.action.toUpperCase() === 'CREATE') badgeColor = 'bg-emerald-100 text-emerald-700';
+                else if(log.action.toUpperCase() === 'EDIT' || log.action.toUpperCase() === 'UPDATE') badgeColor = 'bg-amber-100 text-amber-700';
+                else if(log.action.toUpperCase() === 'DELETE') badgeColor = 'bg-rose-100 text-rose-700';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3.5 text-xs text-slate-500 font-mono">${log.timestamp}</td>
+                    <td class="p-3.5 font-medium text-slate-800">${log.username}</td>
+                    <td class="p-3.5"><span class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md text-xs font-semibold">${log.module}</span></td>
+                    <td class="p-3.5"><span class="${badgeColor} px-2.5 py-1 rounded-md text-xs font-bold uppercase">${log.action}</span></td>
+                    <td class="p-3.5 text-slate-600">${log.narration}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Search/Filter Audit Logs
+        function filterAuditLogs() {
+            const query = document.getElementById('searchAudit').value.toLowerCase();
+            const logs = JSON.parse(localStorage.getItem('sys_audit_logs')) || [];
+            const tbody = document.getElementById('auditTableBody');
+            
+            const filtered = logs.filter(log => 
+                log.narration.toLowerCase().includes(query) ||
+                log.module.toLowerCase().includes(query) ||
+                log.username.toLowerCase().includes(query) ||
+                log.action.toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 italic">No matching records found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(log => {
+                let badgeColor = 'bg-slate-100 text-slate-700';
+                if(log.action.toUpperCase() === 'ADD') badgeColor = 'bg-emerald-100 text-emerald-700';
+                else if(log.action.toUpperCase() === 'EDIT' || log.action.toUpperCase() === 'UPDATE') badgeColor = 'bg-amber-100 text-amber-700';
+                else if(log.action.toUpperCase() === 'DELETE') badgeColor = 'bg-rose-100 text-rose-700';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3.5 text-xs text-slate-500 font-mono">${log.timestamp}</td>
+                    <td class="p-3.5 font-medium text-slate-800">${log.username}</td>
+                    <td class="p-3.5"><span class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md text-xs font-semibold">${log.module}</span></td>
+                    <td class="p-3.5"><span class="${badgeColor} px-2.5 py-1 rounded-md text-xs font-bold uppercase">${log.action}</span></td>
+                    <td class="p-3.5 text-slate-600">${log.narration}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Clear Logs Function
+        function clearAuditLogs() {
+            if(confirm('Are you sure you want to clear all audit history?')) {
+                localStorage.removeItem('sys_audit_logs');
+                loadAuditLogs();
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            loadAuditLogs();
+        };
+    </script>
+</body>
+</html>

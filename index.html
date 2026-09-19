@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Employee Master Directory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+    <!-- ================= LOGIN MODAL / SCREEN ================= -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
+                <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    Invalid User ID or Password!
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to System
+                </button>
+            </form>
+            <div class="mt-4 text-center text-xs text-slate-400">
+                Default Credentials: <b>admin</b> / <b>admin123</b>
+            </div>
+        </div>
+    </div>
+    <!-- ================= MAIN APP DASHBOARD ================= -->
+    <div id="appContainer" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm custom-scrollbar">
+                <!-- Dashboard Button Added at Top -->
+                <a href="dashboard.html" onclick="protectNav(event, 'dashboard.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" onclick="protectNav(event, 'fnf.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-900 transition">
+                    <i class="fa-solid fa-money-check-dollar w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    📊 System Dashboard
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span id="userBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border">
+                        Logged in: <b id="loggedInUserDisplay" class="text-indigo-600">Admin</b>
+                    </span>
+                    <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </header>
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+                <!-- MODULE DISPLAY HEADER CARD -->
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400">HRMS Core Module</span>
+                        <h2 class="text-2xl font-black mt-1">Main System Dashboard</h2>
+                        <p class="text-xs text-slate-300 mt-1">Centralized Overview & System Key Performance Indicators</p>
+                    </div>
+                    <div class="w-14 h-14 bg-indigo-600/30 border border-indigo-400/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-300">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                </div>
+                <!-- DASHBOARD KPI SUMMARY CARDS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Staff</p>
+                            <h3 id="statTotal" class="text-2xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Active Employees</p>
+                            <h3 id="statActive" class="text-2xl font-black text-emerald-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Inactive Staff</p>
+                            <h3 id="statInactive" class="text-2xl font-black text-rose-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-user-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Gross Payroll</p>
+                            <h3 id="statPayroll" class="text-xl font-black text-slate-800 mt-1">Rs. 0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION-WISE CHARTS FOR ALL SIDEBAR NAVIGATION MODULES -->
+                <div class="space-y-6 pt-4">
+                    <div class="border-b pb-2">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-indigo-600"></i> Section-Wise Navigation Module Charts & Overviews
+                        </h3>
+                        <p class="text-xs text-slate-500">Visual performance charts and distribution metrics across all sidebar modules.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        <!-- 1. Employee Management Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-2"><i class="fa-solid fa-address-book"></i> Employee Management</span>
+                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold">Active Roster</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Full-Time Permanent</span>
+                                        <span class="font-bold text-slate-800">75%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-600 h-full rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Contractual Staff</span>
+                                        <span class="font-bold text-slate-800">20%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-blue-500 h-full rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Probationers</span>
+                                        <span class="font-bold text-slate-800">5%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-sky-400 h-full rounded-full" style="width: 5%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Attendance Management Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> Attendance Management</span>
+                                <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold">Today's Log</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Present On-Time</span>
+                                        <span class="font-bold text-emerald-600">88%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full rounded-full" style="width: 88%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Late Arrivals</span>
+                                        <span class="font-bold text-amber-600">8%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-amber-500 h-full rounded-full" style="width: 8%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Absent</span>
+                                        <span class="font-bold text-rose-600">4%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-rose-500 h-full rounded-full" style="width: 4%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Leaves Management Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-blue-600 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Leaves Management</span>
+                                <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-semibold">Monthly Quota</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Casual Leaves</span>
+                                        <span class="font-bold text-slate-800">45%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-blue-600 h-full rounded-full" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Annual Leaves</span>
+                                        <span class="font-bold text-slate-800">35%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-500 h-full rounded-full" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Sick Leaves</span>
+                                        <span class="font-bold text-slate-800">20%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-violet-500 h-full rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Loans & Advances Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar"></i> Loans & Advances</span>
+                                <span class="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-semibold">Active Bookings</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Personal Loans</span>
+                                        <span class="font-bold text-slate-800">60%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-amber-500 h-full rounded-full" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Salary Advances</span>
+                                        <span class="font-bold text-slate-800">30%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-orange-500 h-full rounded-full" style="width: 30%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Vehicle/House Advance</span>
+                                        <span class="font-bold text-slate-800">10%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-yellow-500 h-full rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Income Tax Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-purple-600 flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar"></i> Income Tax Slabs</span>
+                                <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-semibold">FBR Withholding</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Exempt / Zero Tax</span>
+                                        <span class="font-bold text-slate-800">40%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-purple-500 h-full rounded-full" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Standard Slabs (5% - 15%)</span>
+                                        <span class="font-bold text-slate-800">45%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-fuchsia-500 h-full rounded-full" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Higher Slabs (20%+)</span>
+                                        <span class="font-bold text-slate-800">15%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-pink-500 h-full rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Payroll Processing Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-600 flex items-center gap-2"><i class="fa-solid fa-money-bill-wave"></i> Payroll Processing</span>
+                                <span class="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded font-semibold">Disbursement</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Basic Salary Component</span>
+                                        <span class="font-bold text-slate-800">65%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-teal-600 h-full rounded-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>House Rent & Utilities</span>
+                                        <span class="font-bold text-slate-800">25%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full rounded-full" style="width: 25%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Allowances & Overtime</span>
+                                        <span class="font-bold text-slate-800">10%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-cyan-500 h-full rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Employee Benefits Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-2"><i class="fa-solid fa-gift"></i> Employee Benefits</span>
+                                <span class="text-xs bg-rose-50 text-rose-700 px-2 py-0.5 rounded font-semibold">Perks Breakdown</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Medical Insurance</span>
+                                        <span class="font-bold text-slate-800">50%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-rose-500 h-full rounded-full" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Performance Bonuses</span>
+                                        <span class="font-bold text-slate-800">30%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-red-400 h-full rounded-full" style="width: 30%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Fuel & Transport Allowance</span>
+                                        <span class="font-bold text-slate-800">20%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-pink-400 h-full rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. EOBI & SESSI Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> EOBI & SESSI</span>
+                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold">Statutory Compliance</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>EOBI Contributions</span>
+                                        <span class="font-bold text-slate-800">60%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-600 h-full rounded-full" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>SESSI Contributions</span>
+                                        <span class="font-bold text-slate-800">40%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-blue-600 h-full rounded-full" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 9. Reports Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> Analytics & Reports</span>
+                                <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold">Exports Generated</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Payroll & Financial Reports</span>
+                                        <span class="font-bold text-slate-800">55%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-slate-700 h-full rounded-full" style="width: 55%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Attendance & Timesheets</span>
+                                        <span class="font-bold text-slate-800">30%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-slate-500 h-full rounded-full" style="width: 30%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Tax & Audit Reports</span>
+                                        <span class="font-bold text-slate-800">15%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-slate-400 h-full rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 10. Full & Final Settlement Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-2"><i class="fa-solid fa-money-check-dollar"></i> Full & Final Settlement</span>
+                                <span class="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-semibold">Clearance Status</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Settled & Paid</span>
+                                        <span class="font-bold text-emerald-600">80%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full rounded-full" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Pending Clearance</span>
+                                        <span class="font-bold text-amber-600">20%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-amber-500 h-full rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 11. Audit Logs Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-sky-700 flex items-center gap-2"><i class="fa-solid fa-clipboard-list"></i> Audit Logs</span>
+                                <span class="text-xs bg-sky-50 text-sky-700 px-2 py-0.5 rounded font-semibold">Activity Track</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>User Logins & Sessions</span>
+                                        <span class="font-bold text-slate-800">50%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-sky-600 h-full rounded-full" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Data Updates & Edits</span>
+                                        <span class="font-bold text-slate-800">35%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-blue-500 h-full rounded-full" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Record Deletions</span>
+                                        <span class="font-bold text-slate-800">15%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-cyan-500 h-full rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 12. User Management Chart -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-2"><i class="fa-solid fa-users-gear"></i> User Management</span>
+                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold">Access Control</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Active Client Licenses</span>
+                                        <span class="font-bold text-emerald-600">90%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-emerald-500 h-full rounded-full" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                        <span>Expired / Suspended</span>
+                                        <span class="font-bold text-rose-600">10%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div class="bg-rose-500 h-full rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <!-- JavaScript Logic -->
+    <script>
+        const AUTH_KEY = 'sys_logged_in_user';
+        const EMP_STORAGE_KEY = 'sys_employees';
+        let employees = JSON.parse(localStorage.getItem(EMP_STORAGE_KEY)) || [];
+        window.onload = function() {
+            checkAuthStatus();
+            updateDashboardMetrics();
+        };
+        function checkAuthStatus() {
+            const loggedInUser = localStorage.getItem(AUTH_KEY);
+            if (loggedInUser) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('loggedInUserDisplay').innerText = loggedInUser;
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginUserId').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            
+            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+                localStorage.setItem(AUTH_KEY, id);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+                return;
+            }
+            const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
+                               JSON.parse(localStorage.getItem('users')) || 
+                               JSON.parse(localStorage.getItem('sys_clients')) || 
+                               JSON.parse(localStorage.getItem('clients')) || [];
+            const matchedUser = savedUsers.find(user => {
+                const uID = user.userId || user.username || user.user || user.id || user.empID || user.email;
+                const uPass = user.password || user.pass;
+                return uID && uPass && String(uID).trim().toLowerCase() === id.toLowerCase() && String(uPass).trim() === pass;
+            });
+            if (matchedUser) {
+                const displayName = matchedUser.username || matchedUser.userId || matchedUser.name || id;
+                localStorage.setItem(AUTH_KEY, displayName);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+        function logout() {
+            localStorage.removeItem(AUTH_KEY);
+            checkAuthStatus();
+        }
+        function protectNav(e, pageUrl) {
+            if (!localStorage.getItem(AUTH_KEY)) {
+                e.preventDefault();
+                alert('Please login to access navigation links!');
+                checkAuthStatus();
+            }
+        }
+        function updateDashboardMetrics() {
+            let totalStaff = employees.length;
+            let activeStaff = employees.filter(e => (e.empStatus || 'Active') === 'Active').length;
+            let inactiveStaff = employees.filter(e => (e.empStatus || 'Active') === 'Inactive').length;
+            let totalPayrollSum = employees.reduce((acc, curr) => {
+                const sal = (parseFloat(curr.salary) || 0) + (parseFloat(curr.houseRent) || 0) + (parseFloat(curr.medicalAllowance) || 0);
+                return acc + sal;
+            }, 0);
+            document.getElementById('statTotal').innerText = totalStaff;
+            document.getElementById('statActive').innerText = activeStaff;
+            document.getElementById('statInactive').innerText = inactiveStaff;
+            document.getElementById('statPayroll').innerText = `Rs. ${totalPayrollSum.toLocaleString()}`;
+        }
+    </script>
+</body>
+</html>

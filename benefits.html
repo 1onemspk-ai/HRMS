@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Employee Benefits Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { height: 10px; width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-address-book w-5"></i> Employee Management</a>
+                <a href="attendance.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management</a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances</a>
+                <a href="tax.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax</a>
+                <a href="payroll.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing</a>
+                <!-- Active Module -->
+                <a href="benefits.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI</a>
+                <a href="reports.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5"></i> Reports</a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs</a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">HRMS Enterprise v2.6 &copy; 2026</div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-hand-holding-heart text-indigo-600"></i> Benefits & Perks Management
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                
+                <!-- Tab Switching Bar -->
+                <div class="flex border-b border-slate-200 bg-white rounded-xl shadow-sm p-2 gap-2">
+                    <button id="btnTabAssigned" onclick="switchMainTab('assigned')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <i class="fa-solid fa-user-check"></i> Assigned Benefits Directory
+                    </button>
+                    <button id="btnTabSetup" onclick="switchMainTab('setup')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-layer-group"></i> ⚙️ Benefit Plans Setup
+                    </button>
+                </div>
+
+                <!-- ================= TAB 1: ASSIGNED BENEFITS ================= -->
+                <div id="tabAssignedView" class="space-y-6">
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Employee Benefits & Claims</h2>
+                            <p class="text-xs text-slate-500">Manage health insurance, prov fund, and company perks assigned to employees.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="openAssignModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Assign Benefit
+                            </button>
+                            <button onclick="exportToExcel('benefitsTable', 'Employee_Benefits_Data')" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-filter"></i> Search & Filter Claims
+                            </h3>
+                            <button onclick="resetFilters()" class="text-xs text-rose-600 hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Filter
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Search Keyword</label>
+                                <input type="text" id="searchKeyword" onkeyup="renderBenefitsTable()" placeholder="Emp Code, Name, Provider..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Benefit Category</label>
+                                <select id="filterCategory" onchange="renderBenefitsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="All">All Categories</option>
+                                    <option value="Health Insurance">Health Insurance</option>
+                                    <option value="Retirement/Provident">Retirement / Provident</option>
+                                    <option value="Allowance/Perk">Allowance / Perk</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Filter</label>
+                                <select id="filterStatus" onchange="renderBenefitsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="All">All Statuses</option>
+                                    <option value="Active">🟢 Active Only</option>
+                                    <option value="Expired">🔴 Expired / Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden space-y-2 p-4">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                                Total Benefits Assigned: <span id="totalBenefitsBadge" class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">0</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="slideTable('left')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-chevron-left"></i> Slide Left
+                                </button>
+                                <button onclick="slideTable('right')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                    Slide Right <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="tableSliderContainer" class="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar border border-slate-100 rounded-lg">
+                            <table id="benefitsTable" class="w-full text-left border-collapse min-w-[1400px]">
+                                <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
+                                    <tr class="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200">
+                                        <th class="py-3 px-4 font-semibold border-r">Emp Code</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Employee Name</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Benefit Plan</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Category</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Provider</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Coverage / Value</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Emp. Contrib</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Valid From</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Valid Till</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Dependents</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Status</th>
+                                        <th class="py-3 px-4 font-semibold text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="benefitsTableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                    <!-- Dynamic Data -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 2: BENEFIT PLANS SETUP ================= -->
+                <div id="tabSetupView" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="border-b pb-3 flex justify-between items-center">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-indigo-600"></i> Benefit Master Catalog
+                                </h2>
+                                <p class="text-xs text-slate-500">Create global benefit plans (e.g., Jubilee Health, Car Allowance) to assign to employees later.</p>
+                            </div>
+                            <button onclick="openPlanModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Create New Plan
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-3 px-4 font-semibold border-r">Plan Name</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Category</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Provider / Vendor</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Max Coverage Base</th>
+                                        <th class="py-3 px-4 font-semibold border-r text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plansTableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                    <!-- Dynamic Data -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= ADD/EDIT ASSIGNED BENEFIT MODAL ================= -->
+    <div id="assignBenefitModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 my-8">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                <h3 class="font-bold text-lg flex items-center gap-2" id="assignModalTitle"><i class="fa-solid fa-hand-holding-heart text-indigo-400"></i> Assign Benefit to Employee</h3>
+                <button onclick="closeAssignModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="assignBenefitForm" onsubmit="saveAssignedBenefit(event)" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                <input type="hidden" id="benefitRecordId">
+                
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1">Core details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Select Employee *</label>
+                            <select id="modalEmpId" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Select Benefit Plan *</label>
+                            <select id="modalPlanId" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Coverage Start Date *</label>
+                            <input type="date" id="modalStartDate" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Coverage End Date (Leave blank if lifetime)</label>
+                            <input type="date" id="modalEndDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1">Financials & Coverage</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Coverage Amount (Rs)</label>
+                            <input type="number" id="modalCoverageAmt" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Emp. Contribution (Rs or %)</label>
+                            <input type="text" id="modalEmpContrib" placeholder="e.g. 5% or 2000" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Status</label>
+                            <select id="modalStatus" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-700">
+                                <option value="Active">🟢 Active</option>
+                                <option value="Expired">🔴 Expired/Suspended</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Covered Dependents / Nominee (Names & Relations)</label>
+                            <textarea id="modalDependents" rows="2" placeholder="e.g. Sara (Spouse), Ali (Son)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeAssignModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">Save Benefit Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= ADD/EDIT BENEFIT PLAN MODAL (SETUP) ================= -->
+    <div id="planModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-layer-group text-indigo-400"></i> Setup Benefit Plan</h3>
+                <button onclick="closePlanModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="planForm" onsubmit="savePlan(event)" class="p-6 space-y-4">
+                <input type="hidden" id="planId">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Plan Name *</label>
+                    <input type="text" id="setupPlanName" required placeholder="e.g. Jubilee Gold Health" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Category *</label>
+                    <select id="setupCategory" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="Health Insurance">Health Insurance</option>
+                        <option value="Retirement/Provident">Retirement / Provident</option>
+                        <option value="Allowance/Perk">Allowance / Perk</option>
+                        <option value="Company Asset">Company Asset</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Provider / Vendor</label>
+                    <input type="text" id="setupProvider" placeholder="e.g. Jubilee Insurance" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Base Coverage Value</label>
+                    <input type="text" id="setupCoverage" placeholder="e.g. Rs 500,000 / year" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <button type="button" onclick="closePlanModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition">Save Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const EMP_STORAGE_KEY = 'sys_employees';
+        const PLANS_STORAGE_KEY = 'sys_benefit_plans';
+        const ASSIGNED_BENEFITS_KEY = 'sys_employee_benefits';
+
+        let employees = JSON.parse(localStorage.getItem(EMP_STORAGE_KEY)) || [];
+        let plans = JSON.parse(localStorage.getItem(PLANS_STORAGE_KEY)) || [
+            { id: 1, name: "Jubilee Silver Health", category: "Health Insurance", provider: "Jubilee Life", coverage: "300,000 PKR" },
+            { id: 2, name: "Employee Provident Fund", category: "Retirement/Provident", provider: "Internal Trust", coverage: "10% Basic" },
+            { id: 3, name: "Fuel & Car Allowance", category: "Allowance/Perk", provider: "Company", coverage: "15,000 PKR / mo" }
+        ];
+        let assignedBenefits = JSON.parse(localStorage.getItem(ASSIGNED_BENEFITS_KEY)) || [];
+
+        window.onload = function() {
+            renderPlansTable();
+            renderBenefitsTable();
+            populateDropdowns();
+        };
+
+        // Tab Switching Logic
+        function switchMainTab(tab) {
+            const assignedView = document.getElementById('tabAssignedView');
+            const setupView = document.getElementById('tabSetupView');
+            const btnAssigned = document.getElementById('btnTabAssigned');
+            const btnSetup = document.getElementById('btnTabSetup');
+
+            if (tab === 'assigned') {
+                assignedView.classList.remove('hidden');
+                setupView.classList.add('hidden');
+                btnAssigned.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnSetup.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+            } else {
+                assignedView.classList.add('hidden');
+                setupView.classList.remove('hidden');
+                btnSetup.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnAssigned.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+            }
+        }
+
+        // Horizontal Slide helper[cite: 5]
+        function slideTable(direction) {
+            const container = document.getElementById('tableSliderContainer');
+            if (direction === 'left') container.scrollBy({ left: -350, behavior: 'smooth' });
+            else container.scrollBy({ left: 350, behavior: 'smooth' });
+        }
+
+        // Populate Form Dropdowns
+        function populateDropdowns() {
+            const empSelect = document.getElementById('modalEmpId');
+            const planSelect = document.getElementById('modalPlanId');
+            
+            empSelect.innerHTML = `<option value="">-- Select Employee --</option>`;
+            employees.forEach(e => {
+                empSelect.innerHTML += `<option value="${e.empID}">${e.empID} - ${e.empName}</option>`;
+            });
+
+            planSelect.innerHTML = `<option value="">-- Select Plan --</option>`;
+            plans.forEach(p => {
+                planSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.category})</option>`;
+            });
+        }
+
+        // === MASTER PLAN SETUP LOGIC ===
+        function renderPlansTable() {
+            const tbody = document.getElementById('plansTableBody');
+            tbody.innerHTML = '';
+            plans.forEach((p, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-4 font-bold text-slate-800 border-r">${p.name}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">
+                            <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-semibold">${p.category}</span>
+                        </td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${p.provider || '-'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600 font-medium">${p.coverage || '-'}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="editPlan(${index})" class="text-blue-600 hover:bg-blue-50 p-1.5 rounded transition"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deletePlan(${index})" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded transition"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            localStorage.setItem(PLANS_STORAGE_KEY, JSON.stringify(plans));
+        }
+
+        function openPlanModal() {
+            document.getElementById('planForm').reset();
+            document.getElementById('planId').value = '';
+            document.getElementById('planModal').classList.remove('hidden');
+            document.getElementById('planModal').classList.add('flex');
+        }
+
+        function closePlanModal() {
+            document.getElementById('planModal').classList.add('hidden');
+            document.getElementById('planModal').classList.remove('flex');
+        }
+
+        function savePlan(e) {
+            e.preventDefault();
+            const id = document.getElementById('planId').value;
+            const planData = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('setupPlanName').value,
+                category: document.getElementById('setupCategory').value,
+                provider: document.getElementById('setupProvider').value,
+                coverage: document.getElementById('setupCoverage').value
+            };
+
+            if (id) {
+                const idx = plans.findIndex(p => p.id == id);
+                plans[idx] = planData;
+            } else {
+                plans.push(planData);
+            }
+            renderPlansTable();
+            populateDropdowns();
+            closePlanModal();
+        }
+
+        function editPlan(idx) {
+            const p = plans[idx];
+            document.getElementById('planId').value = p.id;
+            document.getElementById('setupPlanName').value = p.name;
+            document.getElementById('setupCategory').value = p.category;
+            document.getElementById('setupProvider').value = p.provider;
+            document.getElementById('setupCoverage').value = p.coverage;
+            document.getElementById('planModal').classList.remove('hidden');
+            document.getElementById('planModal').classList.add('flex');
+        }
+
+        function deletePlan(idx) {
+            if (confirm("Delete this master plan? It may affect existing assignments visually.")) {
+                plans.splice(idx, 1);
+                renderPlansTable();
+                populateDropdowns();
+            }
+        }
+
+
+        // === ASSIGNED BENEFITS LOGIC ===
+        function resetFilters() {
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('filterCategory').value = 'All';
+            document.getElementById('filterStatus').value = 'All';
+            renderBenefitsTable();
+        }
+
+        function autoStatusCheck(endDate) {
+            if (!endDate) return "Active";
+            const end = new Date(endDate);
+            const today = new Date();
+            return end < today ? "Expired" : "Active";
+        }
+
+        function renderBenefitsTable() {
+            const tbody = document.getElementById('benefitsTableBody');
+            const searchVal = document.getElementById('searchKeyword').value.toLowerCase();
+            const catVal = document.getElementById('filterCategory').value;
+            const statVal = document.getElementById('filterStatus').value;
+
+            let filtered = assignedBenefits.filter(b => {
+                const emp = employees.find(e => e.empID === b.empID) || {};
+                const plan = plans.find(p => p.id == b.planId) || {};
+                
+                const matchesSearch = b.empID.toLowerCase().includes(searchVal) || 
+                                     (emp.empName && emp.empName.toLowerCase().includes(searchVal)) ||
+                                     (plan.name && plan.name.toLowerCase().includes(searchVal));
+                const matchesCat = (catVal === 'All' || plan.category === catVal);
+                
+                // Auto calculate status if end date is passed
+                const dynamicStatus = (b.status === 'Expired' || autoStatusCheck(b.endDate) === 'Expired') ? 'Expired' : 'Active';
+                const matchesStat = (statVal === 'All' || dynamicStatus === statVal);
+                
+                return matchesSearch && matchesCat && matchesStat;
+            });
+
+            document.getElementById('totalBenefitsBadge').innerText = filtered.length;
+            tbody.innerHTML = '';
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="text-center py-6 text-slate-400">No benefits found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((b, index) => {
+                const emp = employees.find(e => e.empID === b.empID) || { empName: 'Unknown Employee' };
+                const plan = plans.find(p => p.id == b.planId) || { name: 'Unknown Plan', category: '-', provider: '-' };
+                const actualIdx = assignedBenefits.findIndex(ab => ab.id === b.id);
+                
+                const currentStatus = autoStatusCheck(b.endDate) === 'Expired' ? 'Expired' : b.status;
+                const badge = currentStatus === 'Active' 
+                    ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold border border-emerald-200">Active</span>`
+                    : `<span class="bg-rose-50 text-rose-700 px-2 py-1 rounded-full text-xs font-bold border border-rose-200">Expired</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-4 font-mono font-bold text-indigo-600 border-r text-xs">${b.empID}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 border-r">${emp.empName}</td>
+                        <td class="py-3 px-4 border-r text-xs font-bold text-slate-700">${plan.name}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${plan.category}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${plan.provider}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-800 font-semibold text-emerald-700">Rs. ${b.coverageAmt || '-'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${b.empContrib || '-'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${b.startDate}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${b.endDate || 'Lifetime'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-500 max-w-[150px] truncate" title="${b.dependents}">${b.dependents || '-'}</td>
+                        <td class="py-3 px-4 border-r">${badge}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="editAssignModal(${actualIdx})" class="p-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteAssigned(${actualIdx})" class="p-1.5 bg-rose-50 text-rose-600 rounded hover:bg-rose-100 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            localStorage.setItem(ASSIGNED_BENEFITS_KEY, JSON.stringify(assignedBenefits));
+        }
+
+        function openAssignModal() {
+            document.getElementById('assignBenefitForm').reset();
+            document.getElementById('benefitRecordId').value = '';
+            document.getElementById('assignModalTitle').innerHTML = '<i class="fa-solid fa-plus text-indigo-400"></i> Assign New Benefit';
+            document.getElementById('assignBenefitModal').classList.remove('hidden');
+            document.getElementById('assignBenefitModal').classList.add('flex');
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignBenefitModal').classList.add('hidden');
+            document.getElementById('assignBenefitModal').classList.remove('flex');
+        }
+
+        function saveAssignedBenefit(e) {
+            e.preventDefault();
+            const recordId = document.getElementById('benefitRecordId').value;
+            
+            const data = {
+                id: recordId ? parseInt(recordId) : Date.now(),
+                empID: document.getElementById('modalEmpId').value,
+                planId: document.getElementById('modalPlanId').value,
+                startDate: document.getElementById('modalStartDate').value,
+                endDate: document.getElementById('modalEndDate').value,
+                coverageAmt: document.getElementById('modalCoverageAmt').value,
+                empContrib: document.getElementById('modalEmpContrib').value,
+                status: document.getElementById('modalStatus').value,
+                dependents: document.getElementById('modalDependents').value
+            };
+
+            if(recordId) {
+                const idx = assignedBenefits.findIndex(b => b.id == recordId);
+                assignedBenefits[idx] = data;
+            } else {
+                assignedBenefits.push(data);
+            }
+            
+            renderBenefitsTable();
+            closeAssignModal();
+        }
+
+        function editAssignModal(idx) {
+            const b = assignedBenefits[idx];
+            document.getElementById('benefitRecordId').value = b.id;
+            document.getElementById('modalEmpId').value = b.empID;
+            document.getElementById('modalPlanId').value = b.planId;
+            document.getElementById('modalStartDate').value = b.startDate;
+            document.getElementById('modalEndDate').value = b.endDate;
+            document.getElementById('modalCoverageAmt').value = b.coverageAmt;
+            document.getElementById('modalEmpContrib').value = b.empContrib;
+            document.getElementById('modalStatus').value = b.status;
+            document.getElementById('modalDependents').value = b.dependents;
+            
+            document.getElementById('assignModalTitle').innerHTML = '<i class="fa-solid fa-pen text-indigo-400"></i> Edit Assigned Benefit';
+            document.getElementById('assignBenefitModal').classList.remove('hidden');
+            document.getElementById('assignBenefitModal').classList.add('flex');
+        }
+
+        function deleteAssigned(idx) {
+            if(confirm("Remove this benefit record for the employee?")) {
+                assignedBenefits.splice(idx, 1);
+                renderBenefitsTable();
+            }
+        }
+
+        // Export logic from Code 1_4[cite: 5]
+        function exportToExcel(tableID, filename) {
+            const downloadLink = document.createElement("a");
+            const tableSelect = document.getElementById(tableID);
+            const tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            downloadLink.href = 'data:application/vnd.ms-excel, ' + tableHTML;
+            downloadLink.download = (filename || 'export') + '.xls';
+            downloadLink.click();
+        }
+    </script>
+</body>
+</html>

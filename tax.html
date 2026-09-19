@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Income Tax Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+
+    <!-- ================= LOGIN MODAL / SCREEN ================= -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
+                <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    Invalid User ID or Password!
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to System
+                </button>
+            </form>
+            <div class="mt-4 text-center text-xs text-slate-400">
+                Default Credentials: <b>admin</b> / <b>admin123</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP DASHBOARD ================= -->
+    <div id="appContainer" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-indigo-600"></i> Income Tax Management
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span id="userBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border">
+                        Logged in: <b id="loggedInUserDisplay" class="text-indigo-600">Admin</b>
+                    </span>
+                    <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+                <!-- MODULE DISPLAY HEADER CARD -->
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400">HRMS Core Module</span>
+                        <h2 class="text-2xl font-black mt-1">Income Tax Management</h2>
+                        <p class="text-xs text-slate-300 mt-1">Configure Financial Years, Tax Slabs & Compute Salary Tax Deductions</p>
+                    </div>
+                    <div class="w-14 h-14 bg-indigo-600/30 border border-indigo-400/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-300">
+                        <i class="fa-solid fa-landmark"></i>
+                    </div>
+                </div>
+
+                <!-- CARD 1: CREATE FINANCIAL YEAR -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-plus text-indigo-600"></i> Create Financial Year
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define new financial year start and end periods for tax calculation.</p>
+                    </div>
+
+                    <form onsubmit="addFinancialYear(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">FY Title *</label>
+                                <input type="text" id="fyTitle" placeholder="e.g. FY 2026-2027" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Start Date *</label>
+                                <input type="date" id="fyStart" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">End Date *</label>
+                                <input type="date" id="fyEnd" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Financial Year
+                        </button>
+                    </form>
+                </div>
+
+                <!-- CARD 2: CONFIGURED FINANCIAL YEARS TABLE -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-indigo-600"></i> Configured Financial Years
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">List of all created financial years and active status.</p>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Title</th>
+                                    <th class="p-4">Start Date</th>
+                                    <th class="p-4">End Date</th>
+                                    <th class="p-4">Status / Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fy-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 3: FEED NEW TAX RULE / SLAB -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Feed New Tax Rule / Slab
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define income range brackets and tax percentage rates.</p>
+                    </div>
+
+                    <form onsubmit="addTaxSlab(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Financial Year *</label>
+                                <select id="slabFY" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Min Annual Income *</label>
+                                <input type="number" id="slabMin" placeholder="e.g. 0" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Max Annual Income *</label>
+                                <input type="number" id="slabMax" placeholder="e.g. 600000" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tax Rate (%) *</label>
+                                <input type="number" step="0.01" id="slabRate" placeholder="e.g. 5" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Tax Rule
+                        </button>
+                    </form>
+                </div>
+
+                <!-- CARD 4: ACTIVE TAX SLABS TABLE -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-table-list text-indigo-600"></i> Active Tax Slabs & Rules
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Configured tax rules sorted by annual income limits.</p>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Financial Year</th>
+                                    <th class="p-4">Min Income</th>
+                                    <th class="p-4">Max Income</th>
+                                    <th class="p-4">Tax Rate (%)</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="slabs-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 5: TAX COMPUTATION CALCULATOR -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-indigo-600"></i> Tax Computation Calculator
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Calculate monthly & annual tax deductions for any taxable salary amount.</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Enter Annual Taxable Salary (Rs.)</label>
+                                <input type="number" id="calcSalary" placeholder="e.g. 1500000" class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white" />
+                            </div>
+                            <div>
+                                <button type="button" onclick="computeTax()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                    <i class="fa-solid fa-calculator"></i> Compute Tax
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="computationResult" class="text-sm font-semibold"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const AUTH_KEY = 'sys_logged_in_user';
+        let financialYears = JSON.parse(localStorage.getItem('sys_fy')) || [];
+        let taxSlabs = JSON.parse(localStorage.getItem('sys_slabs')) || [
+            { fy: 'FY 2026-2027', min: 0, max: 600000, rate: 0 },
+            { fy: 'FY 2026-2027', min: 600000, max: 1200000, rate: 5 },
+            { fy: 'FY 2026-2027', min: 1200000, max: 2400000, rate: 15 },
+            { fy: 'FY 2026-2027', min: 2400000, max: 99999999, rate: 25 }
+        ];
+
+        window.onload = function() {
+            checkAuthStatus();
+            if (financialYears.length === 0) {
+                financialYears.push({ title: 'FY 2026-2027', start: '2026-07-01', end: '2027-06-30', active: true });
+                localStorage.setItem('sys_fy', JSON.stringify(financialYears));
+            }
+            renderFinancialYears();
+            renderTaxSlabs();
+            populateFYDropdown();
+        };
+
+        function checkAuthStatus() {
+            const loggedInUser = localStorage.getItem(AUTH_KEY);
+            if (loggedInUser) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('loggedInUserDisplay').innerText = loggedInUser;
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginUserId').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            
+            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+                localStorage.setItem(AUTH_KEY, id);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+                return;
+            }
+            const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
+                               JSON.parse(localStorage.getItem('users')) || 
+                               JSON.parse(localStorage.getItem('sys_clients')) || 
+                               JSON.parse(localStorage.getItem('clients')) || [];
+            const matchedUser = savedUsers.find(user => {
+                const uID = user.userId || user.username || user.user || user.id || user.empID || user.email;
+                const uPass = user.password || user.pass;
+                return uID && uPass && String(uID).trim().toLowerCase() === id.toLowerCase() && String(uPass).trim() === pass;
+            });
+            if (matchedUser) {
+                const displayName = matchedUser.username || matchedUser.userId || matchedUser.name || id;
+                localStorage.setItem(AUTH_KEY, displayName);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(AUTH_KEY);
+            checkAuthStatus();
+        }
+
+        function protectNav(e, pageUrl) {
+            if (!localStorage.getItem(AUTH_KEY)) {
+                e.preventDefault();
+                alert('Please login to access navigation links!');
+                checkAuthStatus();
+            }
+        }
+
+        function renderFinancialYears() {
+            let fyHtml = '';
+            financialYears.forEach((fy, index) => {
+                const statusBadge = fy.active 
+                    ? '<span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1"><i class="fa-solid fa-circle text-[10px]"></i> Active</span>' 
+                    : `<button onclick="setActiveFY(${index})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">Set Active</button>`;
+                
+                fyHtml += `<tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-slate-800">${fy.title}</td>
+                    <td class="p-4 text-slate-600">${fy.start}</td>
+                    <td class="p-4 text-slate-600">${fy.end}</td>
+                    <td class="p-4">${statusBadge}</td>
+                </tr>`;
+            });
+            document.getElementById('fy-table-body').innerHTML = fyHtml;
+        }
+
+        function addFinancialYear(e) {
+            e.preventDefault();
+            const title = document.getElementById('fyTitle').value.trim();
+            const start = document.getElementById('fyStart').value;
+            const end = document.getElementById('fyEnd').value;
+            if (start >= end) {
+                alert('Start Date must be earlier than End Date!');
+                return;
+            }
+            financialYears.forEach(fy => fy.active = false);
+            financialYears.push({ title, start, end, active: true });
+            localStorage.setItem('sys_fy', JSON.stringify(financialYears));
+            renderFinancialYears();
+            populateFYDropdown();
+            document.getElementById('fyTitle').value = '';
+            document.getElementById('fyStart').value = '';
+            document.getElementById('fyEnd').value = '';
+            alert('Financial Year added successfully!');
+        }
+
+        function setActiveFY(index) {
+            financialYears.forEach((fy, i) => {
+                fy.active = (i === index);
+            });
+            localStorage.setItem('sys_fy', JSON.stringify(financialYears));
+            renderFinancialYears();
+        }
+
+        function populateFYDropdown() {
+            const select = document.getElementById('slabFY');
+            let options = '';
+            financialYears.forEach(fy => {
+                options += `<option value="${fy.title}">${fy.title}</option>`;
+            });
+            select.innerHTML = options;
+        }
+
+        function renderTaxSlabs() {
+            let slabHtml = '';
+            taxSlabs.forEach((slab, index) => {
+                slabHtml += `<tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-indigo-600">${slab.fy || 'FY 2026-2027'}</td>
+                    <td class="p-4 font-semibold text-slate-700">Rs. ${slab.min.toLocaleString()}</td>
+                    <td class="p-4 font-semibold text-slate-700">Rs. ${slab.max.toLocaleString()}</td>
+                    <td class="p-4 font-bold text-emerald-600">${slab.rate}%</td>
+                    <td class="p-4 text-center">
+                        <button class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-rose-200 transition flex items-center gap-1 mx-auto" onclick="deleteSlab(${index})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('slabs-table-body').innerHTML = slabHtml;
+        }
+
+        function addTaxSlab(e) {
+            e.preventDefault();
+            const fy = document.getElementById('slabFY').value;
+            const min = parseFloat(document.getElementById('slabMin').value);
+            const max = parseFloat(document.getElementById('slabMax').value);
+            const rate = parseFloat(document.getElementById('slabRate').value);
+            if (min >= max) {
+                alert('Min Income must be less than Max Income!');
+                return;
+            }
+            taxSlabs.push({ fy, min, max, rate });
+            taxSlabs.sort((a, b) => a.min - b.min);
+            localStorage.setItem('sys_slabs', JSON.stringify(taxSlabs));
+            renderTaxSlabs();
+            document.getElementById('slabMin').value = '';
+            document.getElementById('slabMax').value = '';
+            document.getElementById('slabRate').value = '';
+            alert('Tax rule added successfully!');
+        }
+
+        function deleteSlab(index) {
+            if (confirm('Delete this tax rule?')) {
+                taxSlabs.splice(index, 1);
+                localStorage.setItem('sys_slabs', JSON.stringify(taxSlabs));
+                renderTaxSlabs();
+            }
+        }
+
+        function computeTax() {
+            const salary = parseFloat(document.getElementById('calcSalary').value);
+            const resultDiv = document.getElementById('computationResult');
+            if (isNaN(salary) || salary < 0) {
+                resultDiv.innerHTML = '<div class="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl"><i class="fa-solid fa-triangle-exclamation"></i> Please enter a valid annual salary amount.</div>';
+                return;
+            }
+            const activeFYObj = financialYears.find(fy => fy.active) || financialYears[0];
+            const activeFYTitle = activeFYObj ? activeFYObj.title : 'FY 2026-2027';
+            const activeSlabs = taxSlabs.filter(slab => (slab.fy || 'FY 2026-2027') === activeFYTitle);
+            let applicableTax = 0;
+            for (let slab of activeSlabs) {
+                if (salary >= slab.min && salary <= slab.max) {
+                    applicableTax = (salary * slab.rate) / 100;
+                    break;
+                }
+            }
+            const monthlyTax = applicableTax / 12;
+            resultDiv.innerHTML = `
+                <div class="p-4 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl space-y-1">
+                    <p class="font-bold text-indigo-700 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Active FY: ${activeFYTitle}
+                    </p>
+                    <p class="text-xs">Annual Tax Amount: <b class="text-slate-800 text-sm">Rs. ${applicableTax.toLocaleString(undefined, {maximumFractionDigits: 2})}</b></p>
+                    <p class="text-xs">Monthly Tax Deduction: <b class="text-indigo-600 text-sm">Rs. ${monthlyTax.toLocaleString(undefined, {maximumFractionDigits: 2})}</b></p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

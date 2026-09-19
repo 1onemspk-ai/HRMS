@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Attendance Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+    <!-- ================= LOGIN MODAL / SCREEN ================= -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
+                <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    Invalid User ID or Password!
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to System
+                </button>
+            </form>
+            <div class="mt-4 text-center text-xs text-slate-400">
+                Default Credentials: <b>admin</b> / <b>admin123</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CUSTOM TWO-STEP DELETE MODAL ================= -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-slate-200 text-center space-y-4">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mx-auto">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800" id="deleteModalTitle">Are you sure?</h3>
+            <p class="text-xs text-slate-500" id="deleteModalDesc">This action cannot be undone. Please confirm to proceed.</p>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">Confirm Step 1</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP DASHBOARD ================= -->
+    <div id="appContainer" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm custom-scrollbar">
+                <a href="dashboard.html" onclick="protectNav(event, 'dashboard.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <a href="eobi_sessi.html" onclick="protectNav(event, 'eobi_sessi.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-indigo-600"></i> Attendance Management
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span id="userBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border">
+                        Logged in: <b id="loggedInUserDisplay" class="text-indigo-600">Admin</b>
+                    </span>
+                    <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+                <!-- MODULE DISPLAY HEADER CARD -->
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400">HRMS Core Module</span>
+                        <h2 class="text-2xl font-black mt-1">Attendance Management</h2>
+                        <p class="text-xs text-slate-300 mt-1">Manual Attendance Entry, Biometric Device Discovery & Machine Logs Import</p>
+                    </div>
+                    <div class="w-14 h-14 bg-indigo-600/30 border border-indigo-400/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-300">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+
+                <!-- SUB TABS NAVIGATION -->
+                <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2">
+                    <button class="sub-btn bg-indigo-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm" onclick="showSubTab('manual')">
+                        <i class="fa-solid fa-pen-to-square"></i> Manual Entry
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('discovery')">
+                        <i class="fa-solid fa-network-wired"></i> Device Discovery
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('filter')">
+                        <i class="fa-solid fa-filter"></i> Machine Data Filter
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('attendanceProcess')">
+                        <i class="fa-solid fa-list-check"></i> Attendance Process
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('dailyAttendance')">
+                        <i class="fa-solid fa-calendar-day"></i> View Daily Attendance
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('shiftSetting')">
+                        <i class="fa-solid fa-business-time"></i> Shift Setting
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('employeeWeekends')">
+                        <i class="fa-solid fa-calendar-minus"></i> Employee Weekends
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('gazettedHolidays')">
+                        <i class="fa-solid fa-landmark"></i> Gazetted Holidays
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('roaster')">
+                        <i class="fa-solid fa-calendar-week"></i> Roaster
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('penalty')">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Penalty
+                    </button>
+                    <button class="sub-btn bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-2" onclick="showSubTab('exemption')">
+                        <i class="fa-solid fa-user-shield"></i> Penalty Exemption
+                    </button>
+                </div>
+
+                <!-- TAB 1: MANUAL ENTRY -->
+                <div id="manual" class="tab-content-area bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-user-pen text-indigo-600"></i> Mark Manual Attendance
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Select an employee and set attendance status for the selected date.</p>
+                    </div>
+                    <form id="attendanceForm" onsubmit="event.preventDefault(); alert('Attendance Saved Successfully!');">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                            <div>
+                                <label for="attEmpSelect" class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee *</label>
+                                <select id="attEmpSelect" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                                    <option value="">-- Choose Employee --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="attDate" class="block text-xs font-bold text-slate-700 uppercase mb-2">Date *</label>
+                                <input type="date" id="attDate" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" />
+                            </div>
+                            <div>
+                                <label for="attStatus" class="block text-xs font-bold text-slate-700 uppercase mb-2">Status *</label>
+                                <select id="attStatus" required class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Leave">Leave</option>
+                                    <option value="Off Day">Off Day</option>
+                                    <option value="Holiday">Holiday</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Manual Attendance
+                        </button>
+                    </form>
+                </div>
+
+                <!-- TAB 2: DEVICE DISCOVERY -->
+                <div id="discovery" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass text-indigo-600"></i> Extended Network & Nearby Machines
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Scan your local subnets to auto-detect ZKTeco and biometric attendance devices.</p>
+                        </div>
+                        <button onclick="scanNetwork()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md flex items-center gap-2 self-start sm:self-auto" id="scanBtn">
+                            <i class="fa-solid fa-rotate"></i> Scan Wide Network Subnets
+                        </button>
+                    </div>
+                    <div id="loader" class="hidden p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-sm flex items-center gap-3">
+                        <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                        Scanning wide network ranges (Subnets 192.168.1.x to 10.0.0.x)... Please wait...
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table id="deviceTable" class="hidden w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Device Name</th>
+                                    <th class="p-4">IP Address / Range</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceTableBody" class="divide-y divide-slate-200 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MACHINE DATA FILTER -->
+                <div id="filter" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-box-archive text-indigo-600"></i> Filter & Fetch Machine Logs
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Select a machine and date range to import attendance raw logs.</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Machine:</label>
+                                <select id="filterMachine" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option>Main Gate - BioTime 1</option>
+                                    <option>Office Door - BioTime 2</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">From Date:</label>
+                                <input type="date" id="filterFrom" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">To Date:</label>
+                                <input type="date" id="filterTo" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <button onclick="fetchMachineData()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-download"></i> Filter & Import Data
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table id="filteredDataTable" class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Time</th>
+                                    <th class="p-4">Emp Code</th>
+                                    <th class="p-4">Device</th>
+                                    <th class="p-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="filteredBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-400 font-medium">Use filters above to load machine log data.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: ATTENDANCE PROCESS -->
+                <div id="attendanceProcess" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-indigo-600"></i> Attendance Process
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Run attendance calculations and upload machine data records.</p>
+                    </div>
+                    
+                    <!-- Section 1: Attendance Run -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <h4 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-play text-indigo-600"></i> Attendance Run
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">From Date *</label>
+                                <input type="date" id="runFromDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">To Date *</label>
+                                <input type="date" id="runToDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Filter By (Emp ID, Name, Division, Dept, Section, Desig, Shift, Branch)</label>
+                                <select id="runFilterField" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="empID">Emp ID</option>
+                                    <option value="empName">Name</option>
+                                    <option value="division">Division</option>
+                                    <option value="department">Department</option>
+                                    <option value="section">Section</option>
+                                    <option value="designation">Designation</option>
+                                    <option value="shift">Shift</option>
+                                    <option value="branch">Branch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Search Value / All</label>
+                                <input type="text" id="runSearchVal" placeholder="Type 'all' or specific criteria..." class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white" value="all">
+                            </div>
+                        </div>
+                        <button onclick="runAttendanceProcess()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-play"></i> Run Attendance
+                        </button>
+                    </div>
+
+                    <!-- Section 2: Attendance Upload -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <h4 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-upload text-indigo-600"></i> Attendance Upload
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">From Date *</label>
+                                <input type="date" id="uploadFromDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">To Date *</label>
+                                <input type="date" id="uploadToDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="importAttendanceUpload()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-file-arrow-down"></i> Import Machine Data
+                            </button>
+                            <button id="uploadProcessBtn" disabled onclick="uploadAttendanceProcess()" class="bg-indigo-400 cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Adjust Records
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: VIEW DAILY ATTENDANCE -->
+                <div id="dailyAttendance" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day text-indigo-600"></i> View Daily Attendance
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Filter employee attendance records using date range and multiple criteria parameters.</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">From Date *</label>
+                                <input type="date" id="dailyFromDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">To Date *</label>
+                                <input type="date" id="dailyToDate" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Status / Type Filter</label>
+                                <select id="dailyStatusFilter" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">All Statuses</option>
+                                    <option value="Active">Active Employees Only</option>
+                                    <option value="Inactive">Inactive Employees Only</option>
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Irregular">Irregular</option>
+                                    <option value="Leave">Leave</option>
+                                    <option value="Off Day">Off Day</option>
+                                    <option value="Holiday">Holiday</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Division / Department / Column Filter</label>
+                                <select id="dailyColumnFilterKey" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Search by Column --</option>
+                                    <option value="empID">Emp ID</option>
+                                    <option value="empName">Employee Name</option>
+                                    <option value="division">Division</option>
+                                    <option value="department">Department</option>
+                                    <option value="designation">Designation</option>
+                                    <option value="branch">Branch</option>
+                                    <option value="shift">Shift</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Column Filter Value / Keyword</label>
+                                <input type="text" id="dailyColumnFilterVal" placeholder="Type keyword to filter column..." class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="filterDailyAttendance()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Search Attendance Records
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Day</th>
+                                    <th class="p-4">Employee ID</th>
+                                    <th class="p-4">Name</th>
+                                    <th class="p-4">Department</th>
+                                    <th class="p-4">Shift</th>
+                                    <th class="p-4">IN Time</th>
+                                    <th class="p-4">Out Time</th>
+                                    <th class="p-4">Attendance Status</th>
+                                    <th class="p-4">Remarks</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dailyAttendanceBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="11" class="p-6 text-center text-slate-400 font-medium">Select date range and click search to view daily attendance.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: SHIFT SETTING -->
+                <div id="shiftSetting" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-business-time text-indigo-600"></i> Employee Shift Settings
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define working shifts, timings, grace periods, and half-day rules.</p>
+                    </div>
+                    <form id="shiftForm" onsubmit="saveShift(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Shift Name *</label>
+                                <input type="text" id="shiftName" required placeholder="e.g. Morning Shift" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Check-In Time *</label>
+                                <input type="time" id="shiftIn" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Check-Out Time *</label>
+                                <input type="time" id="shiftOut" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Grace Period (Minutes)</label>
+                                <input type="number" id="shiftGrace" placeholder="15" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-plus"></i> Save Shift Definition
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Shift Name</th>
+                                    <th class="p-4">Check-In</th>
+                                    <th class="p-4">Check-Out</th>
+                                    <th class="p-4">Grace Period</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="shiftTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-400 font-medium">No shifts configured yet. Add your first shift above.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: EMPLOYEE WEEKENDS -->
+                <div id="employeeWeekends" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-minus text-indigo-600"></i> Employee Weekend Day Assignment
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define specific weekend off days for employees so they are marked as Off Day automatically.</p>
+                    </div>
+                    <form id="weekendForm" onsubmit="saveWeekend(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee *</label>
+                                <select id="weekendEmpSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Choose Employee --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Weekend Day(s) *</label>
+                                <select id="weekendDaySelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="Sunday">Sunday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Saturday & Sunday">Saturday & Sunday</option>
+                                    <option value="Friday & Saturday">Friday & Saturday</option>
+                                    <option value="Friday Only">Friday Only</option>
+                                    <option value="Sunday Only">Sunday Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Employee Weekend
+                        </button>
+                    </form>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Assigned Weekend</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekendTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="3" class="p-6 text-center text-slate-400 font-medium">No employee weekends configured yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 7: GAZETTED HOLIDAYS -->
+                <div id="gazettedHolidays" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-landmark text-indigo-600"></i> Gazetted & Government Holidays
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define holidays that automatically apply to all employees simultaneously across the organization.</p>
+                    </div>
+                    <form id="holidayForm" onsubmit="saveHoliday(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Holiday Name *</label>
+                                <input type="text" id="holidayName" required placeholder="e.g. Independence Day" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Holiday Date *</label>
+                                <input type="date" id="holidayDate" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Description / Type</label>
+                                <input type="text" id="holidayDesc" placeholder="National Holiday" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-plus"></i> Add Gazetted Holiday
+                        </button>
+                    </form>
+                    <!-- Filter and Search Row inside Gazetted Holidays tab -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Holidays</label>
+                            <select id="holidayFilterSelect" onchange="renderHolidays()" class="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white">
+                                <option value="">All Types / Default</option>
+                                <option value="National Holiday">National Holiday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Search Holidays</label>
+                            <input type="text" id="holidaySearchInput" oninput="renderHolidays()" placeholder="Search by name..." class="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Holiday Name</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Description</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holidayTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="4" class="p-6 text-center text-slate-400 font-medium">No gazetted holidays added yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 8: ROASTER -->
+                <div id="roaster" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-week text-indigo-600"></i> Employee Roster Management
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Assign shifts from an effective date onwards. Supports bulk import, export, and templates.</p>
+                    </div>
+                    <!-- Bulk Operations Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-bold text-slate-700 uppercase">Roaster Bulk Actions:</div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="downloadRoasterTemplate()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-arrow-down"></i> Template
+                            </button>
+                            <button type="button" onclick="importRoaster()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-arrow-up"></i> Import
+                            </button>
+                            <button type="button" onclick="exportRoaster()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-export"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <form id="roasterForm" onsubmit="saveRoaster(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <input type="hidden" id="editRoasterIndex" value="-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee *</label>
+                                <select id="roasterEmpSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Choose Employee --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Shift *</label>
+                                <select id="roasterShiftSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Choose Shift --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Effective Date (Onwards) *</label>
+                                <input type="date" id="roasterDate" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div id="roasterErrorMsg" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 p-3 rounded-xl border border-rose-200"></div>
+                        <div class="flex items-center gap-3">
+                            <button type="submit" id="roasterSubmitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-plus"></i> Assign Roaster (From Date Onwards)
+                            </button>
+                            <button type="button" id="roasterCancelEditBtn" onclick="cancelRoasterEdit()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                Cancel Edit
+                            </button>
+                        </div>
+                    </form>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Assigned Shift</th>
+                                    <th class="p-4">Effective Date (Onwards)</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roasterTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="4" class="p-6 text-center text-slate-400 font-medium">No rosters assigned yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 9: PENALTY -->
+                <div id="penalty" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-indigo-600"></i> Penalty & Deduction Rules
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Define custom penalty rules like per-minute deductions or days-wise ratios.</p>
+                    </div>
+                    <form id="penaltyForm" onsubmit="savePenalty(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <input type="hidden" id="editPenaltyIndex" value="-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Penalty Rule Name *</label>
+                                <input type="text" id="penaltyName" required placeholder="e.g. Per-Minute or 3-Late Rule" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Shift *</label>
+                                <select id="penaltyShiftSelect" onchange="onPenaltyShiftChange()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Choose Shift --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">In & Out Time *</label>
+                                <input type="text" id="penaltyInOutTime" required placeholder="In & Out Time" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Target Event *</label>
+                                <select id="penaltyTrigger" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="Late Arrival">Late Arrival</option>
+                                    <option value="Early Departure">Early Departure</option>
+                                    <option value="Early exampt">Early exampt</option>
+                                    <option value="Late exampt">Late exampt</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Dedutive time from</label>
+                                <input type="time" id="penaltyDeductiveTime" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Deductive time to</label>
+                                <input type="time" id="penaltyDeductiveTimeTwo" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Deduction criteria *</label>
+                                <select id="penaltyDeductionAfter" onchange="onDeductionAfterChange()" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="Minutes">Minutes</option>
+                                    <option value="Per Minute Deduction">Per Minute Deduction</option>
+                                    <option value="Hours">Hours</option>
+                                    <option value="Day">Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Deduction unit</label>
+                                <input type="text" id="penaltyCriteria" placeholder="" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="submit" id="penaltySubmitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-shield-cat"></i> Save Penalty Rule
+                            </button>
+                            <button type="button" id="penaltyCancelEditBtn" onclick="cancelPenaltyEdit()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                Cancel Edit
+                            </button>
+                        </div>
+                    </form>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Rule Name</th>
+                                    <th class="p-4">Shift</th>
+                                    <th class="p-4">In & Out Time</th>
+                                    <th class="p-4">Target Event</th>
+                                    <th class="p-4">Dedutive time from</th>
+                                    <th class="p-4">Deductive time to</th>
+                                    <th class="p-4">Deduction criteria</th>
+                                    <th class="p-4">Deduction unit</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="penaltyTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="9" class="p-6 text-center text-slate-400 font-medium">No penalty rules defined yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 10: EXEMPTION -->
+                <div id="exemption" class="tab-content-area hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-indigo-600"></i> Penalty Exemption Management
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Exempt specific employees from penalty rules or specific deductions with formal filtering.</p>
+                    </div>
+                    <form id="exemptionForm" onsubmit="saveExemption(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <input type="hidden" id="editExemptionIndex" value="-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Employee *</label>
+                                <select id="exemptionEmpSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="">-- Choose Employee --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Date *</label>
+                                <input type="date" id="exemptionDate" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Exemption Type / Penalty *</label>
+                                <select id="exemptionRuleSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                                    <option value="All Penalties">All Penalties</option>
+                                    <option value="Late Arrival Exemption">Late Arrival Exemption</option>
+                                    <option value="Early Departure Exemption">Early Departure Exemption</option>
+                                    <option value="Absenteeism Exemption">Absenteeism Exemption</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Reason / Remarks *</label>
+                                <input type="text" id="exemptionReason" required placeholder="e.g. Management Approval / Special Shift" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="submit" id="exemptionSubmitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-shield-heart"></i> Save Exemption Rule
+                            </button>
+                            <button type="button" id="exemptionCancelEditBtn" onclick="cancelExemptionEdit()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                                Cancel Edit
+                            </button>
+                        </div>
+                    </form>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Exemption Scope</th>
+                                    <th class="p-4">Reason / Remarks</th>
+                                    <th class="p-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exemptionTableBody" class="divide-y divide-slate-200 text-sm">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-400 font-medium">No exemptions configured yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const AUTH_KEY = 'sys_logged_in_user';
+        const EMP_STORAGE_KEY = 'sys_employees';
+        const SHIFT_STORAGE_KEY = 'sys_shifts';
+        const ROASTER_STORAGE_KEY = 'sys_roasters';
+        const PENALTY_STORAGE_KEY = 'sys_penalties';
+        const WEEKEND_STORAGE_KEY = 'sys_weekends';
+        const HOLIDAY_STORAGE_KEY = 'sys_holidays';
+        const EXEMPTION_STORAGE_KEY = 'sys_exemptions';
+        const DAILY_ATTENDANCE_PROCESSED_KEY = 'sys_processed_daily_attendance';
+        
+        let employees = JSON.parse(localStorage.getItem(EMP_STORAGE_KEY)) || [];
+        let shifts = JSON.parse(localStorage.getItem(SHIFT_STORAGE_KEY)) || [];
+        let roasters = JSON.parse(localStorage.getItem(ROASTER_STORAGE_KEY)) || [];
+        let penalties = JSON.parse(localStorage.getItem(PENALTY_STORAGE_KEY)) || [];
+        let weekends = JSON.parse(localStorage.getItem(WEEKEND_STORAGE_KEY)) || [];
+        let holidays = JSON.parse(localStorage.getItem(HOLIDAY_STORAGE_KEY)) || [];
+        let exemptions = JSON.parse(localStorage.getItem(EXEMPTION_STORAGE_KEY)) || [];
+        let processedDailyAttendance = JSON.parse(localStorage.getItem(DAILY_ATTENDANCE_PROCESSED_KEY)) || [];
+
+        // Global delete confirmation step tracker
+        let deleteActionCallback = null;
+        let deleteStep = 1;
+
+        window.onload = function() {
+            checkAuthStatus();
+            populateEmployees();
+            renderShifts();
+            renderWeekends();
+            renderHolidays();
+            renderRoasters();
+            renderPenalties();
+            renderExemptions();
+            onDeductionAfterChange();
+        };
+
+        function checkAuthStatus() {
+            const loggedInUser = localStorage.getItem(AUTH_KEY);
+            if (loggedInUser) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('loggedInUserDisplay').innerText = loggedInUser;
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginUserId').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            
+            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+                localStorage.setItem(AUTH_KEY, id);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+                return;
+            }
+            const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
+                               JSON.parse(localStorage.getItem('users')) || 
+                               JSON.parse(localStorage.getItem('sys_clients')) || 
+                               JSON.parse(localStorage.getItem('clients')) || [];
+            const matchedUser = savedUsers.find(user => {
+                const uID = user.userId || user.username || user.user || user.id || user.empID || user.email;
+                const uPass = user.password || user.pass;
+                return uID && uPass && String(uID).trim().toLowerCase() === id.toLowerCase() && String(uPass).trim() === pass;
+            });
+            if (matchedUser) {
+                const displayName = matchedUser.username || matchedUser.userId || matchedUser.name || id;
+                localStorage.setItem(AUTH_KEY, displayName);
+                document.getElementById('loginError').classList.add('hidden');
+                checkAuthStatus();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(AUTH_KEY);
+            checkAuthStatus();
+        }
+
+        function protectNav(e, pageUrl) {
+            if (!localStorage.getItem(AUTH_KEY)) {
+                e.preventDefault();
+                alert('Please login to access navigation links!');
+                checkAuthStatus();
+            }
+        }
+
+        // Sub-Tab Switching
+        function showSubTab(id) {
+            document.querySelectorAll('.tab-content-area').forEach(div => div.classList.add('hidden'));
+            document.querySelectorAll('.sub-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+            });
+            const target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                event.currentTarget.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+            }
+        }
+
+        // Populate Employees & Shifts Dropdowns
+        function populateEmployees() {
+            const select = document.getElementById('attEmpSelect');
+            const roasterSelect = document.getElementById('roasterEmpSelect');
+            const weekendSelect = document.getElementById('weekendEmpSelect');
+            const exemptionSelect = document.getElementById('exemptionEmpSelect');
+            if (select) {
+                select.innerHTML = '<option value="">-- Choose Employee --</option>';
+                employees.forEach(emp => {
+                    select.innerHTML += `<option value="${emp.empID}">${emp.empID} - ${emp.empName}</option>`;
+                });
+            }
+            if (roasterSelect) {
+                roasterSelect.innerHTML = '<option value="">-- Choose Employee --</option>';
+                employees.forEach(emp => {
+                    roasterSelect.innerHTML += `<option value="${emp.empID}">${emp.empID} - ${emp.empName}</option>`;
+                });
+            }
+            if (weekendSelect) {
+                weekendSelect.innerHTML = '<option value="">-- Choose Employee --</option>';
+                employees.forEach(emp => {
+                    weekendSelect.innerHTML += `<option value="${emp.empID}">${emp.empID} - ${emp.empName}</option>`;
+                });
+            }
+            if (exemptionSelect) {
+                exemptionSelect.innerHTML = '<option value="">-- Choose Employee --</option>';
+                employees.forEach(emp => {
+                    exemptionSelect.innerHTML += `<option value="${emp.empID}">${emp.empID} - ${emp.empName}</option>`;
+                });
+            }
+        }
+
+        function populateShifts() {
+            const roasterShiftSelect = document.getElementById('roasterShiftSelect');
+            const penaltyShiftSelect = document.getElementById('penaltyShiftSelect');
+            if (roasterShiftSelect) {
+                roasterShiftSelect.innerHTML = '<option value="">-- Choose Shift --</option>';
+                shifts.forEach(s => {
+                    roasterShiftSelect.innerHTML += `<option value="${s.name}">${s.name} (${s.in} - ${s.out})</option>`;
+                });
+            }
+            if (penaltyShiftSelect) {
+                penaltyShiftSelect.innerHTML = '<option value="">-- Choose Shift --</option>';
+                shifts.forEach(s => {
+                    penaltyShiftSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                });
+            }
+        }
+
+        function onPenaltyShiftChange() {
+            const selectedShiftName = document.getElementById('penaltyShiftSelect').value;
+            const foundShift = shifts.find(s => s.name === selectedShiftName);
+            if (foundShift) {
+                document.getElementById('penaltyInOutTime').value = `${foundShift.in || ''} - ${foundShift.out || ''}`;
+            } else {
+                document.getElementById('penaltyInOutTime').value = '';
+            }
+        }
+
+        function onDeductionAfterChange() {
+            const val = document.getElementById('penaltyDeductionAfter').value;
+            const criteriaInput = document.getElementById('penaltyCriteria');
+            if (val === 'Minutes' || val === 'Per Minute Deduction') {
+                criteriaInput.value = '';
+                criteriaInput.disabled = true;
+                criteriaInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+            } else {
+                criteriaInput.disabled = false;
+                criteriaInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+            }
+        }
+
+        // Two-step Delete Popups Handler
+        function triggerTwoStepDelete(callback, itemName = 'item') {
+            deleteStep = 1;
+            deleteActionCallback = callback;
+            const modal = document.getElementById('deleteModal');
+            const title = document.getElementById('deleteModalTitle');
+            const desc = document.getElementById('deleteModalDesc');
+            const btn = document.getElementById('confirmDeleteBtn');
+            
+            title.innerText = `Delete ${itemName}? (Step 1 of 2)`;
+            desc.innerText = `Are you sure you want to delete this ${itemName}? Click Confirm to proceed to final verification.`;
+            btn.innerText = 'Confirm Step 1';
+            btn.className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md';
+            
+            btn.onclick = function() {
+                if (deleteStep === 1) {
+                    deleteStep = 2;
+                    title.innerText = `Final Confirmation: Delete ${itemName}? (Step 2 of 2)`;
+                    desc.innerText = `This is irreversible. Click Final Delete to permanently remove this record.`;
+                    btn.innerText = 'Final Delete';
+                    btn.className = 'flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md';
+                } else {
+                    closeDeleteModal();
+                    if (deleteActionCallback) deleteActionCallback();
+                }
+            };
+            modal.classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            deleteActionCallback = null;
+            deleteStep = 1;
+        }
+
+        // Extended Scanner Logic
+        function scanNetwork() {
+            const loader = document.getElementById('loader');
+            const table = document.getElementById('deviceTable');
+            loader.classList.remove('hidden');
+            table.classList.add('hidden');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                table.classList.remove('hidden');
+                document.getElementById('deviceTableBody').innerHTML = `
+                  <tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-slate-800">ZKTeco K40 - Main Gate</td><td class="p-4 text-slate-600 font-mono text-xs">192.168.1.105</td><td class="p-4 text-center"><button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">Connect</button></td></tr>
+                  <tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-slate-800">ZKTeco MB20 - Office Floor 1</td><td class="p-4 text-slate-600 font-mono text-xs">192.168.1.142</td><td class="p-4 text-center"><button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">Connect</button></td></tr>
+                  <tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-slate-800">ZKTeco uFace800 - Factory Entrance</td><td class="p-4 text-slate-600 font-mono text-xs">192.168.2.55</td><td class="p-4 text-center"><button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">Connect</button></td></tr>
+                  <tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-slate-800">ZKTeco In1A - Warehouse Sector B</td><td class="p-4 text-slate-600 font-mono text-xs">10.0.0.88</td><td class="p-4 text-center"><button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">Connect</button></td></tr>
+                `;
+            }, 2500);
+        }
+
+        // Filter Machine Logs Logic
+        function fetchMachineData() {
+            const fDate = document.getElementById('filterFrom').value || '2026-09-01';
+            const body = document.getElementById('filteredBody');
+            body.innerHTML = `
+                <tr class="hover:bg-slate-50"><td class="p-4 font-medium">${fDate}</td><td class="p-4 font-medium">10:00 AM</td><td class="p-4 font-mono text-xs font-semibold text-indigo-600">EMP001</td><td class="p-4">Main Gate</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold">IN</span></td></tr>
+                <tr class="hover:bg-slate-50"><td class="p-4 font-medium">${fDate}</td><td class="p-4 font-medium">06:00 PM</td><td class="p-4 font-mono text-xs font-semibold text-indigo-600">EMP001</td><td class="p-4">Main Gate</td><td class="p-4"><span class="bg-rose-100 text-rose-700 text-xs px-2.5 py-1 rounded-full font-bold">OUT</span></td></tr>
+            `;
+            alert('Machine data filtered successfully!');
+        }
+        
+        function getDatesInRange(startDate, endDate) {
+            const dateList = [];
+            let currentDate = new Date(startDate);
+            const stopDate = new Date(endDate);
+            while (currentDate <= stopDate) {
+                dateList.push(new Date(currentDate).toISOString().split('T')[0]);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            return dateList;
+        }
+
+        function isWeekendDay(dateStr, weekendSetting) {
+            const d = new Date(dateStr);
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+            if (!weekendSetting) return false;
+            return weekendSetting.toLowerCase().includes(dayName.toLowerCase());
+        }
+
+        // Attendance Process & Upload with Roster Check and IN/OUT time rules
+        function importAttendanceUpload() {
+            const fromD = document.getElementById('uploadFromDate').value;
+            const toD = document.getElementById('uploadToDate').value;
+            if (!fromD || !toD) {
+                alert('Please select date range for import!');
+                return;
+            }
+            alert('Machine data for selected date range imported successfully!');
+            document.getElementById('uploadProcessBtn').disabled = false;
+            document.getElementById('uploadProcessBtn').classList.remove('bg-indigo-400', 'cursor-not-allowed');
+            document.getElementById('uploadProcessBtn').classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        }
+        
+        function uploadAttendanceProcess() {
+            const fromD = document.getElementById('uploadFromDate').value;
+            const toD = document.getElementById('uploadToDate').value;
+            if (!fromD || !toD) {
+                alert('Please select date range for upload & adjustment!');
+                return;
+            }
+            
+            const dateArray = getDatesInRange(fromD, toD);
+            processedDailyAttendance = [];
+            if (employees.length === 0) {
+                employees = [{ empID: 'EMP001', empName: 'John Doe', department: 'Operations' }];
+            }
+
+            employees.forEach(emp => {
+                const empID = emp.empID || 'EMP001';
+                dateArray.forEach(dt => {
+                    // Logic: Check if employee roster is defined
+                    const empRoasters = roasters
+                        .filter(r => r.empID === empID && r.date <= dt)
+                        .sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    if (empRoasters.length === 0) {
+                        // Roster not defined -> Process will not run or mark unassigned
+                        return;
+                    }
+                    const activeShiftName = empRoasters[0].shiftName;
+                    const shiftObj = shifts.find(s => s.name === activeShiftName) || { in: '09:00', out: '17:00' };
+
+                    const holidayObj = holidays.find(h => h.date === dt);
+                    const empWeekend = weekends.find(w => w.empID === empID);
+                    const weekendMatched = empWeekend ? isWeekendDay(dt, empWeekend.weekendDays) : false;
+
+                    let status = 'Present';
+                    let inTime = '09:00 AM';
+                    let outTime = '05:00 PM';
+                    let remarks = 'Upload adjusted';
+
+                    if (holidayObj) {
+                        status = 'Holiday';
+                        inTime = '-';
+                        outTime = '-';
+                        remarks = holidayObj.name;
+                    } else if (weekendMatched) {
+                        status = 'Off Day';
+                        inTime = '-';
+                        outTime = '-';
+                        remarks = 'Weekend Off';
+                    } else {
+                        // IN and Out time to Upload attendance
+                        inTime = '09:15 AM';
+                        outTime = '05:00 PM';
+                        // Range check logic: if no machine record within shift range -> Absent, both -> Present, one -> Irregular
+                        const hasIn = inTime && inTime !== '00:00';
+                        const hasOut = outTime && outTime !== '00:00';
+                        if (!hasIn && !hasOut) {
+                            status = 'Absent';
+                            inTime = '00:00';
+                            outTime = '00:00';
+                        } else if (hasIn && hasOut) {
+                            status = 'Present';
+                        } else {
+                            status = 'Irregular';
+                        }
+                    }
+
+                    const dayName = new Date(dt).toLocaleDateString('en-US', { weekday: 'long' });
+                    processedDailyAttendance.push({
+                        date: dt,
+                        day: dayName,
+                        empID: empID,
+                        empName: emp.empName || 'John Doe',
+                        department: emp.department || 'Operations',
+                        shift: activeShiftName,
+                        inTime: inTime,
+                        outTime: outTime,
+                        status: status,
+                        remarks: remarks
+                    });
+                });
+            });
+            localStorage.setItem(DAILY_ATTENDANCE_PROCESSED_KEY, JSON.stringify(processedDailyAttendance));
+            alert('Attendance uploaded successfully with Roster shift fetching and time range status evaluation!');
+        }
+
+        function runAttendanceProcess() {
+            const fromD = document.getElementById('runFromDate').value;
+            const toD = document.getElementById('runToDate').value;
+            if (!fromD || !toD) {
+                alert('Please select date range for attendance run!');
+                return;
+            }
+            const dateArray = getDatesInRange(fromD, toD);
+            processedDailyAttendance = [];
+            if (employees.length === 0) {
+                employees = [{ empID: 'EMP001', empName: 'John Doe', department: 'Operations' }];
+            }
+
+            employees.forEach(emp => {
+                const empID = emp.empID || 'EMP001';
+                dateArray.forEach(dt => {
+                    const empRoasters = roasters
+                        .filter(r => r.empID === empID && r.date <= dt)
+                        .sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    if (empRoasters.length === 0) {
+                        // Logic: jb tk employee ka roaster define naa ho uska process nhi chalega
+                        return;
+                    }
+                    const activeShiftName = empRoasters[0].shiftName;
+                    const holidayObj = holidays.find(h => h.date === dt);
+                    const empWeekend = weekends.find(w => w.empID === empID);
+                    const weekendMatched = empWeekend ? isWeekendDay(dt, empWeekend.weekendDays) : false;
+
+                    let status = 'Present';
+                    let inTime = '09:00 AM';
+                    let outTime = '05:00 PM';
+                    let remarks = 'Regular';
+
+                    if (holidayObj) {
+                        status = 'Holiday';
+                        inTime = '-';
+                        outTime = '-';
+                        remarks = holidayObj.name;
+                    } else if (weekendMatched) {
+                        status = 'Off Day';
+                        inTime = '-';
+                        outTime = '-';
+                        remarks = 'Weekend Off';
+                    } else {
+                        status = 'Present';
+                    }
+
+                    const dayName = new Date(dt).toLocaleDateString('en-US', { weekday: 'long' });
+                    processedDailyAttendance.push({
+                        date: dt,
+                        day: dayName,
+                        empID: empID,
+                        empName: emp.empName || 'John Doe',
+                        department: emp.department || 'Operations',
+                        shift: activeShiftName,
+                        inTime: inTime,
+                        outTime: outTime,
+                        status: status,
+                        remarks: remarks
+                    });
+                });
+            });
+            localStorage.setItem(DAILY_ATTENDANCE_PROCESSED_KEY, JSON.stringify(processedDailyAttendance));
+            alert('Attendance process completed for employees with defined rosters!');
+        }
+
+        // View Daily Attendance Filter (with Day column & Action Edit/Delete)
+        function filterDailyAttendance() {
+            const fromD = document.getElementById('dailyFromDate').value;
+            const toD = document.getElementById('dailyToDate').value;
+            const statusF = document.getElementById('dailyStatusFilter').value;
+            const colKey = document.getElementById('dailyColumnFilterKey').value;
+            const colVal = document.getElementById('dailyColumnFilterVal').value.trim().toLowerCase();
+            
+            if (!fromD || !toD) {
+                alert('Please select both From and To date ranges!');
+                return;
+            }
+            let recordsToDisplay = processedDailyAttendance.filter(r => r.date >= fromD && r.date <= toD);
+            if (statusF && statusF !== 'Active' && statusF !== 'Inactive') {
+                recordsToDisplay = recordsToDisplay.filter(r => r.status === statusF);
+            }
+            if (colKey && colVal) {
+                recordsToDisplay = recordsToDisplay.filter(r => {
+                    const val = String(r[colKey] || '').toLowerCase();
+                    return val.includes(colVal);
+                });
+            }
+
+            const tbody = document.getElementById('dailyAttendanceBody');
+            if (recordsToDisplay.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-rose-500 font-medium">No matching daily attendance records found. Ensure rosters are defined and attendance process/upload has been run.</td></tr>`;
+                return;
+            }
+            let html = '';
+            recordsToDisplay.forEach((r, idx) => {
+                let badgeClass = 'bg-emerald-100 text-emerald-700';
+                if (r.status === 'Off Day') badgeClass = 'bg-amber-100 text-amber-700';
+                else if (r.status === 'Holiday') badgeClass = 'bg-purple-100 text-purple-700';
+                else if (r.status === 'Absent') badgeClass = 'bg-rose-100 text-rose-700';
+                else if (r.status === 'Irregular') badgeClass = 'bg-yellow-100 text-yellow-800';
+                else if (r.status === 'Leave') badgeClass = 'bg-blue-100 text-blue-700';
+
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-mono text-xs font-semibold text-slate-700">${r.date}</td>
+                        <td class="p-4 font-semibold text-indigo-600">${r.day}</td>
+                        <td class="p-4 font-mono text-xs font-semibold text-indigo-600">${r.empID}</td>
+                        <td class="p-4 font-medium text-slate-800">${r.empName}</td>
+                        <td class="p-4 text-slate-600">${r.department}</td>
+                        <td class="p-4 text-indigo-600 font-medium">${r.shift}</td>
+                        <td class="p-4 font-mono text-xs">${r.inTime}</td>
+                        <td class="p-4 font-mono text-xs">${r.outTime}</td>
+                        <td class="p-4"><span class="${badgeClass} text-xs px-2.5 py-1 rounded-full font-bold">${r.status}</span></td>
+                        <td class="p-4 text-slate-500">${r.remarks}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editDailyAttendance(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteDailyAttendance(${idx}), 'Daily Attendance')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editDailyAttendance(idx) {
+            alert('Edit Daily Attendance mode opened for record index ' + idx);
+        }
+
+        function deleteDailyAttendance(idx) {
+            processedDailyAttendance.splice(idx, 1);
+            localStorage.setItem(DAILY_ATTENDANCE_PROCESSED_KEY, JSON.stringify(processedDailyAttendance));
+            filterDailyAttendance();
+        }
+
+        // Shift Settings Logic
+        function saveShift(e) {
+            e.preventDefault();
+            const name = document.getElementById('shiftName').value.trim();
+            const inTime = document.getElementById('shiftIn').value;
+            const outTime = document.getElementById('shiftOut').value;
+            const grace = document.getElementById('shiftGrace').value || '0';
+            shifts.push({ name, in: inTime, out: outTime, grace });
+            localStorage.setItem(SHIFT_STORAGE_KEY, JSON.stringify(shifts));
+            renderShifts();
+            populateShifts();
+            document.getElementById('shiftForm').reset();
+            alert('Shift saved successfully!');
+        }
+
+        function renderShifts() {
+            const tbody = document.getElementById('shiftTableBody');
+            if (shifts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-medium">No shifts configured yet. Add your first shift above.</td></tr>`;
+                return;
+            }
+            let html = '';
+            shifts.forEach((s, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${s.name}</td>
+                        <td class="p-4 font-mono text-xs">${s.in}</td>
+                        <td class="p-4 font-mono text-xs">${s.out}</td>
+                        <td class="p-4 text-slate-600">${s.grace} mins</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editShift(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteShift(${idx}), 'Shift')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            populateShifts();
+        }
+
+        function editShift(idx) {
+            const s = shifts[idx];
+            document.getElementById('shiftName').value = s.name;
+            document.getElementById('shiftIn').value = s.in;
+            document.getElementById('shiftOut').value = s.out;
+            document.getElementById('shiftGrace').value = s.grace;
+            deleteShift(idx);
+        }
+
+        function deleteShift(idx) {
+            shifts.splice(idx, 1);
+            localStorage.setItem(SHIFT_STORAGE_KEY, JSON.stringify(shifts));
+            renderShifts();
+        }
+
+        // Employee Weekend Settings Logic
+        function saveWeekend(e) {
+            e.preventDefault();
+            const empID = document.getElementById('weekendEmpSelect').value;
+            const weekendDays = document.getElementById('weekendDaySelect').value;
+            const empObj = employees.find(x => x.empID === empID);
+            const empName = empObj ? empObj.empName : empID;
+            const existingIndex = weekends.findIndex(w => w.empID === empID);
+            if (existingIndex >= 0) {
+                weekends[existingIndex].weekendDays = weekendDays;
+            } else {
+                weekends.push({ empID, empName, weekendDays });
+            }
+            localStorage.setItem(WEEKEND_STORAGE_KEY, JSON.stringify(weekends));
+            renderWeekends();
+            document.getElementById('weekendForm').reset();
+            alert('Employee weekend saved successfully!');
+        }
+
+        function renderWeekends() {
+            const tbody = document.getElementById('weekendTableBody');
+            if (weekends.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium">No employee weekends configured yet.</td></tr>`;
+                return;
+            }
+            let html = '';
+            weekends.forEach((w, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${w.empID} - ${w.empName}</td>
+                        <td class="p-4 text-indigo-600 font-semibold">${w.weekendDays}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editWeekend(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteWeekend(${idx}), 'Weekend')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editWeekend(idx) {
+            const w = weekends[idx];
+            document.getElementById('weekendEmpSelect').value = w.empID;
+            document.getElementById('weekendDaySelect').value = w.weekendDays;
+            deleteWeekend(idx);
+        }
+
+        function deleteWeekend(idx) {
+            weekends.splice(idx, 1);
+            localStorage.setItem(WEEKEND_STORAGE_KEY, JSON.stringify(weekends));
+            renderWeekends();
+        }
+
+        // Gazetted Holidays Logic (with filter and search support)
+        function saveHoliday(e) {
+            e.preventDefault();
+            const name = document.getElementById('holidayName').value.trim();
+            const date = document.getElementById('holidayDate').value;
+            const desc = document.getElementById('holidayDesc').value.trim() || 'Government Holiday';
+            holidays.push({ name, date, desc });
+            localStorage.setItem(HOLIDAY_STORAGE_KEY, JSON.stringify(holidays));
+            renderHolidays();
+            document.getElementById('holidayForm').reset();
+            alert('Gazetted holiday added successfully!');
+        }
+
+        function renderHolidays() {
+            const tbody = document.getElementById('holidayTableBody');
+            const filterVal = document.getElementById('holidayFilterSelect') ? document.getElementById('holidayFilterSelect').value.toLowerCase() : '';
+            const searchVal = document.getElementById('holidaySearchInput') ? document.getElementById('holidaySearchInput').value.toLowerCase() : '';
+
+            let filteredHolidays = holidays.filter(h => {
+                const matchType = !filterVal || h.desc.toLowerCase().includes(filterVal);
+                const matchSearch = !searchVal || h.name.toLowerCase().includes(searchVal);
+                return matchType && matchSearch;
+            });
+
+            if (filteredHolidays.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">No matching gazetted holidays found.</td></tr>`;
+                return;
+            }
+            let html = '';
+            filteredHolidays.forEach((h, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${h.name}</td>
+                        <td class="p-4 font-mono text-xs">${h.date}</td>
+                        <td class="p-4 text-slate-600">${h.desc}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editHoliday(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteHoliday(${idx}), 'Holiday')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editHoliday(idx) {
+            const h = holidays[idx];
+            document.getElementById('holidayName').value = h.name;
+            document.getElementById('holidayDate').value = h.date;
+            document.getElementById('holidayDesc').value = h.desc;
+            deleteHoliday(idx);
+        }
+
+        function deleteHoliday(idx) {
+            holidays.splice(idx, 1);
+            localStorage.setItem(HOLIDAY_STORAGE_KEY, JSON.stringify(holidays));
+            renderHolidays();
+        }
+
+        // Roaster Logic (Duplicate error check: pehle wali entry pehle delete hoogi)
+        function saveRoaster(e) {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('editRoasterIndex').value);
+            const empID = document.getElementById('roasterEmpSelect').value;
+            const shiftName = document.getElementById('roasterShiftSelect').value;
+            const date = document.getElementById('roasterDate').value;
+            const errorDiv = document.getElementById('roasterErrorMsg');
+
+            // Check duplicate entry for same employee and date
+            const existingDuplicate = roasters.find((r, i) => r.empID === empID && r.date === date && i !== editIdx);
+            if (existingDuplicate) {
+                errorDiv.classList.remove('hidden');
+                errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: Duplicate roaster entry exists for this employee on date ${date}. Pehle wali entry pehle delete hoogi!`;
+                return;
+            } else {
+                errorDiv.classList.add('hidden');
+                errorDiv.innerText = '';
+            }
+
+            const empObj = employees.find(x => x.empID === empID);
+            const empName = empObj ? empObj.empName : empID;
+
+            if (editIdx >= 0) {
+                roasters[editIdx] = { empID, empName, shiftName, date };
+                document.getElementById('editRoasterIndex').value = '-1';
+                document.getElementById('roasterSubmitBtn').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Assign Roaster (From Date Onwards)';
+                document.getElementById('roasterCancelEditBtn').classList.add('hidden');
+            } else {
+                roasters.push({ empID, empName, shiftName, date });
+            }
+            localStorage.setItem(ROASTER_STORAGE_KEY, JSON.stringify(roasters));
+            renderRoasters();
+            document.getElementById('roasterForm').reset();
+            alert('Roaster assigned successfully!');
+        }
+
+        function renderRoasters() {
+            const tbody = document.getElementById('roasterTableBody');
+            if (roasters.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">No rosters assigned yet.</td></tr>`;
+                return;
+            }
+            let html = '';
+            roasters.forEach((r, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${r.empID} - ${r.empName}</td>
+                        <td class="p-4 text-indigo-600 font-semibold">${r.shiftName}</td>
+                        <td class="p-4 font-mono text-xs">${r.date} (Onwards)</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editRoaster(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteRoaster(${idx}), 'Roaster')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editRoaster(idx) {
+            const r = roasters[idx];
+            document.getElementById('editRoasterIndex').value = idx;
+            document.getElementById('roasterEmpSelect').value = r.empID;
+            document.getElementById('roasterShiftSelect').value = r.shiftName;
+            document.getElementById('roasterDate').value = r.date;
+            document.getElementById('roasterSubmitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Roaster';
+            document.getElementById('roasterCancelEditBtn').classList.remove('hidden');
+        }
+
+        function cancelRoasterEdit() {
+            document.getElementById('editRoasterIndex').value = '-1';
+            document.getElementById('roasterForm').reset();
+            document.getElementById('roasterSubmitBtn').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Assign Roaster (From Date Onwards)';
+            document.getElementById('roasterCancelEditBtn').classList.add('hidden');
+            document.getElementById('roasterErrorMsg').classList.add('hidden');
+        }
+
+        function deleteRoaster(idx) {
+            roasters.splice(idx, 1);
+            localStorage.setItem(ROASTER_STORAGE_KEY, JSON.stringify(roasters));
+            renderRoasters();
+        }
+
+        function downloadRoasterTemplate() {
+            const csvContent = "empID,shiftName,effectiveDate\nEMP001,Morning Shift,2026-09-01\nEMP002,Evening Shift,2026-09-01";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "roaster_template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportRoaster() {
+            if (roasters.length === 0) {
+                alert('No roaster data available to export.');
+                return;
+            }
+            let csvContent = "empID,empName,shiftName,effectiveDate\n";
+            roasters.forEach(r => {
+                csvContent += `${r.empID},"${r.empName}",${r.shiftName},${r.date}\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "roaster_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importRoaster() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const lines = event.target.result.split('\n');
+                    let importedCount = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(',');
+                        if (cols.length >= 3 && cols[0].trim()) {
+                            const empID = cols[0].trim();
+                            const shiftName = cols[1].trim();
+                            const date = cols[2].trim();
+                            const empObj = employees.find(x => x.empID === empID);
+                            const empName = empObj ? empObj.empName : empID;
+                            roasters.push({ empID, empName, shiftName, date });
+                            importedCount++;
+                        }
+                    }
+                    localStorage.setItem(ROASTER_STORAGE_KEY, JSON.stringify(roasters));
+                    renderRoasters();
+                    alert(`Successfully imported ${importedCount} roaster assignments!`);
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Penalty Logic
+        function savePenalty(e) {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('editPenaltyIndex').value);
+            const name = document.getElementById('penaltyName').value.trim();
+            const shiftSelect = document.getElementById('penaltyShiftSelect').value;
+            const inOutTime = document.getElementById('penaltyInOutTime').value;
+            const trigger = document.getElementById('penaltyTrigger').value;
+            const deductiveTime = document.getElementById('penaltyDeductiveTime').value.trim();
+            const deductiveTimeTwo = document.getElementById('penaltyDeductiveTimeTwo').value.trim();
+            const deductionAfter = document.getElementById('penaltyDeductionAfter').value;
+            const criteria = document.getElementById('penaltyCriteria').value.trim();
+            
+            const penaltyObj = { name, shiftSelect, inOutTime, trigger, deductiveTime, deductiveTimeTwo, deductionAfter, criteria };
+            if (editIdx >= 0) {
+                penalties[editIdx] = penaltyObj;
+                document.getElementById('editPenaltyIndex').value = '-1';
+                document.getElementById('penaltySubmitBtn').innerHTML = '<i class="fa-solid fa-shield-cat"></i> Save Penalty Rule';
+                document.getElementById('penaltyCancelEditBtn').classList.add('hidden');
+            } else {
+                penalties.push(penaltyObj);
+            }
+
+            localStorage.setItem(PENALTY_STORAGE_KEY, JSON.stringify(penalties));
+            renderPenalties();
+            document.getElementById('penaltyForm').reset();
+            onDeductionAfterChange();
+            alert('Custom penalty rule saved successfully!');
+        }
+
+        function renderPenalties() {
+            const tbody = document.getElementById('penaltyTableBody');
+            if (penalties.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400 font-medium">No penalty rules defined yet.</td></tr>`;
+                return;
+            }
+            let html = '';
+            penalties.forEach((p, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${p.name}</td>
+                        <td class="p-4 text-slate-700">${p.shiftSelect}</td>
+                        <td class="p-4 font-mono text-xs">${p.inOutTime}</td>
+                        <td class="p-4 text-slate-700">${p.trigger}</td>
+                        <td class="p-4 font-mono text-xs">${p.deductiveTime || '-'}</td>
+                        <td class="p-4 font-mono text-xs">${p.deductiveTimeTwo || '-'}</td>
+                        <td class="p-4 text-indigo-600 font-medium">${p.deductionAfter}</td>
+                        <td class="p-4 font-mono text-xs">${p.criteria || '-'}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editPenalty(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deletePenalty(${idx}), 'Penalty Rule')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editPenalty(idx) {
+            const p = penalties[idx];
+            document.getElementById('editPenaltyIndex').value = idx;
+            document.getElementById('penaltyName').value = p.name;
+            document.getElementById('penaltyShiftSelect').value = p.shiftSelect;
+            document.getElementById('penaltyInOutTime').value = p.inOutTime;
+            document.getElementById('penaltyTrigger').value = p.trigger;
+            document.getElementById('penaltyDeductiveTime').value = p.deductiveTime;
+            document.getElementById('penaltyDeductiveTimeTwo').value = p.deductiveTimeTwo;
+            document.getElementById('penaltyDeductionAfter').value = p.deductionAfter;
+            document.getElementById('penaltyCriteria').value = p.criteria;
+            onDeductionAfterChange();
+            document.getElementById('penaltySubmitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Penalty Rule';
+            document.getElementById('penaltyCancelEditBtn').classList.remove('hidden');
+        }
+
+        function cancelPenaltyEdit() {
+            document.getElementById('editPenaltyIndex').value = '-1';
+            document.getElementById('penaltyForm').reset();
+            onDeductionAfterChange();
+            document.getElementById('penaltySubmitBtn').innerHTML = '<i class="fa-solid fa-shield-cat"></i> Save Penalty Rule';
+            document.getElementById('penaltyCancelEditBtn').classList.add('hidden');
+        }
+
+        function deletePenalty(idx) {
+            penalties.splice(idx, 1);
+            localStorage.setItem(PENALTY_STORAGE_KEY, JSON.stringify(penalties));
+            renderPenalties();
+        }
+
+        // Exemption Logic
+        function saveExemption(e) {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('editExemptionIndex').value);
+            const empID = document.getElementById('exemptionEmpSelect').value;
+            const date = document.getElementById('exemptionDate').value;
+            const ruleSelect = document.getElementById('exemptionRuleSelect').value;
+            const reason = document.getElementById('exemptionReason').value.trim();
+            const empObj = employees.find(x => x.empID === empID);
+            const empName = empObj ? empObj.empName : empID;
+
+            const exObj = { empID, empName, date, ruleSelect, reason };
+            if (editIdx >= 0) {
+                exemptions[editIdx] = exObj;
+                document.getElementById('editExemptionIndex').value = '-1';
+                document.getElementById('exemptionSubmitBtn').innerHTML = '<i class="fa-solid fa-shield-heart"></i> Save Exemption Rule';
+                document.getElementById('exemptionCancelEditBtn').classList.add('hidden');
+            } else {
+                exemptions.push(exObj);
+            }
+
+            localStorage.setItem(EXEMPTION_STORAGE_KEY, JSON.stringify(exemptions));
+            renderExemptions();
+            document.getElementById('exemptionForm').reset();
+            alert('Penalty exemption saved successfully!');
+        }
+
+        function renderExemptions() {
+            const tbody = document.getElementById('exemptionTableBody');
+            if (exemptions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-medium">No exemptions configured yet.</td></tr>`;
+                return;
+            }
+            let html = '';
+            exemptions.forEach((ex, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-semibold text-slate-800">${ex.empID} - ${ex.empName}</td>
+                        <td class="p-4 font-mono text-xs">${ex.date}</td>
+                        <td class="p-4 text-indigo-600 font-semibold">${ex.ruleSelect}</td>
+                        <td class="p-4 text-slate-600">${ex.reason}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editExemption(${idx})" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold px-2 py-1 bg-indigo-50 rounded border border-indigo-200">Edit</button>
+                            <button onclick="triggerTwoStepDelete(() => deleteExemption(${idx}), 'Exemption')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function editExemption(idx) {
+            const ex = exemptions[idx];
+            document.getElementById('editExemptionIndex').value = idx;
+            document.getElementById('exemptionEmpSelect').value = ex.empID;
+            document.getElementById('exemptionDate').value = ex.date;
+            document.getElementById('exemptionRuleSelect').value = ex.ruleSelect;
+            document.getElementById('exemptionReason').value = ex.reason;
+            document.getElementById('exemptionSubmitBtn').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Exemption Rule';
+            document.getElementById('exemptionCancelEditBtn').classList.remove('hidden');
+        }
+
+        function cancelExemptionEdit() {
+            document.getElementById('editExemptionIndex').value = '-1';
+            document.getElementById('exemptionForm').reset();
+            document.getElementById('exemptionSubmitBtn').innerHTML = '<i class="fa-solid fa-shield-heart"></i> Save Exemption Rule';
+            document.getElementById('exemptionCancelEditBtn').classList.add('hidden');
+        }
+
+        function deleteExemption(idx) {
+            exemptions.splice(idx, 1);
+            localStorage.setItem(EXEMPTION_STORAGE_KEY, JSON.stringify(exemptions));
+            renderExemptions();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Full & Final Settlement</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (XLSX) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-address-book w-5"></i> Employee Management</a>
+                <a href="attendance.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management</a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances</a>
+                <a href="tax.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax</a>
+                <a href="payroll.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing</a>
+                <a href="benefits.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-gift w-5"></i> Employee Benefits</a>
+                <a href="eobi_sessi.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI</a>
+                <a href="reports.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-line w-5"></i> Reports</a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md"><i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement</a>
+                <a href="audit.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs</a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-users-gear w-5"></i> User Management</a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-signature text-indigo-600"></i> Full & Final Settlement Processing
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                <!-- Tab Switching Bar -->
+                <div class="flex border-b border-slate-200 bg-white rounded-xl shadow-sm p-2 gap-2">
+                    <button id="btnTabProcessor" onclick="switchFnFTab('processor')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <i class="fa-solid fa-calculator"></i> Settlement Calculator & Form
+                    </button>
+                    <button id="btnTabRecords" onclick="switchFnFTab('records')" class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-folder-open"></i> Saved Settlements Records
+                    </button>
+                </div>
+
+                <!-- TAB 1: PROCESSOR & FORM -->
+                <div id="tabProcessorView" class="space-y-6">
+                    <form id="fnfForm" onsubmit="saveFnFSettlement(event)" class="space-y-6">
+                        <!-- Section 1 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-user"></i> Employee Information & Separation Details
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Select Employee *</label>
+                                    <input type="text" id="fnfEmpCode" list="empDatalist" placeholder="Search Code or Name..." onchange="onEmployeeSelect()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                    <datalist id="empDatalist"></datalist>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Father/Husband's Name</label>
+                                    <input type="text" id="fnfFatherName" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">CNIC</label>
+                                    <input type="text" id="fnfCNIC" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Department</label>
+                                    <input type="text" id="fnfDept" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Designation</label>
+                                    <input type="text" id="fnfDesig" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Employment Type</label>
+                                    <input type="text" id="fnfEmpType" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Joining (DOJ)</label>
+                                    <input type="date" id="fnfDOJ" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Resignation Date</label>
+                                    <input type="date" id="fnfResigDate" onchange="calculateTenure()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Date of Exit</label>
+                                    <input type="date" id="fnfExitDate" onchange="calculateTenure()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tenure / Service Duration</label>
+                                    <input type="text" id="fnfTenure" placeholder="Auto Calculated" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Gross Salary</label>
+                                    <input type="number" id="fnfGrossSalary" value="0" oninput="calculateNoticePayDeduction(); calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Notice Served Days</label>
+                                    <input type="number" id="fnfNoticeServedDays" value="30" oninput="calculateNoticePayDeduction(); calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                            <h3 class="text-xs font-bold text-emerald-600 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-plus"></i> Earnings & Receivables (Payable to Employee)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Total Pay Days</label>
+                                    <input type="number" id="fnfWorkedDays" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Paid Salary Amount</label>
+                                    <input type="number" id="fnfPaidSalaryAmt" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Encashed Leave Days</label>
+                                    <input type="number" id="fnfLeaveDays" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Leave Encashment Amount</label>
+                                    <input type="number" id="fnfLeaveAmt" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Management Allowance</label>
+                                    <input type="number" id="fnfMgmtAllow" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Conveyance Allowance</label>
+                                    <input type="number" id="fnfConveyanceAllow" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Food Allowance</label>
+                                    <input type="number" id="fnfFoodAllow" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Vehicle Rental Allowance</label>
+                                    <input type="number" id="fnfVehicleAllow" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fuel Amount</label>
+                                    <input type="number" id="fnfFuelAmt" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Gratuity Amount</label>
+                                    <input type="number" id="fnfGratuityAmt" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Bonus</label>
+                                    <input type="number" id="fnfBonus" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Arrears / Other Benefits</label>
+                                    <input type="number" id="fnfArrear" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Settlement Remarks / Audit Notes</label>
+                                <textarea id="fnfRemarks" rows="2" placeholder="Enter settlement notes or details..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                            <h3 class="text-xs font-bold text-rose-600 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-minus"></i> Deductions & Recoveries (Recoverable from Employee)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Notice Pay Deduction</label>
+                                    <input type="number" id="fnfNoticeRecoveryAmt" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Outstanding Loan</label>
+                                    <input type="number" id="fnfLoanBalance" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Advance Salary</label>
+                                    <input type="number" id="fnfAdvance" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Deduction</label>
+                                    <input type="number" id="fnfEobiDeduction" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Income Tax Deduction</label>
+                                    <input type="number" id="fnfTaxDeduction" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Asset Loss / Other Deductions</label>
+                                    <input type="number" id="fnfAssetLoss" value="0" oninput="calculateSettlement()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-square-check"></i> Department Clearances Checklist
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm font-medium text-slate-700">
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkIT" checked class="rounded text-indigo-600 focus:ring-indigo-500"> IT Hardware Returned</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkAdmin" checked class="rounded text-indigo-600 focus:ring-indigo-500"> Access Card Returned</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkFinance" checked class="rounded text-indigo-600 focus:ring-indigo-500"> Finance Cleared</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkDept" checked class="rounded text-indigo-600 focus:ring-indigo-500"> Handover Completed</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkAdministration" checked class="rounded text-indigo-600 focus:ring-indigo-500"> Administration Cleared</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkTransport" checked class="rounded text-indigo-600 focus:ring-indigo-500"> Transport Cleared</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="chkHR" checked class="rounded text-indigo-600 focus:ring-indigo-500"> HR Cleared</label>
+                            </div>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-calculator"></i> Net Settlement Summary
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-white text-center">
+                                <div class="bg-emerald-600 p-4 rounded-xl shadow-sm">
+                                    <h4 class="text-xs font-semibold uppercase opacity-90">Total Earnings</h4>
+                                    <h2 id="dispTotalEarnings" class="text-2xl font-bold mt-1">Rs. 0</h2>
+                                </div>
+                                <div class="bg-rose-600 p-4 rounded-xl shadow-sm">
+                                    <h4 class="text-xs font-semibold uppercase opacity-90">Total Deductions</h4>
+                                    <h2 id="dispTotalDeductions" class="text-2xl font-bold mt-1">Rs. 0</h2>
+                                </div>
+                                <div class="bg-slate-900 p-4 rounded-xl shadow-sm">
+                                    <h4 class="text-xs font-semibold uppercase opacity-90">Net Payable / (Recoverable)</h4>
+                                    <h2 id="dispNetSettlement" class="text-2xl font-bold mt-1">Rs. 0</h2>
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Amount in Words</label>
+                                <input type="text" id="fnfAmountInWords" disabled class="w-full border border-slate-300 bg-slate-100 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold" />
+                            </div>
+                            <div class="flex justify-end gap-3 pt-4 border-t">
+                                <button type="button" onclick="resetFnFForm()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition">Reset Form</button>
+                                <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition shadow-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save & Generate Settlement
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 2: SAVED RECORDS -->
+                <div id="tabRecordsView" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-open text-indigo-600"></i> Saved Full & Final Settlement Records
+                            </h3>
+                            <button onclick="exportToExcel('settlementsTable', 'FnF_Settlements_Report')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-file-excel"></i> Export Excel
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar border border-slate-100 rounded-lg">
+                            <table id="settlementsTable" class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead class="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-3 px-4 font-semibold border-r">Code</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Employee Name</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Department</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Exit Date</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Gross Salary</th>
+                                        <th class="py-3 px-4 font-semibold border-r">Net Payable</th>
+                                        <th class="py-3 px-4 font-semibold text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settlementsTableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VIEW & PRINT SETTLEMENT MODAL -->
+    <div id="viewModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 my-8">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-file-invoice text-indigo-400"></i> Full & Final Settlement Statement</h3>
+                <div class="flex items-center gap-3">
+                    <button onclick="downloadPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Download PDF
+                    </button>
+                    <button onclick="closeViewModal()" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="settlementPrintArea" class="p-8 space-y-6 max-h-[75vh] overflow-y-auto bg-white text-slate-800">
+                <div class="text-center border-b pb-4">
+                    <h2 class="text-2xl font-bold text-slate-900">HRMS ENTERPRISE PORTAL</h2>
+                    <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Full & Final Settlement Certificate</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div><strong>Employee Code:</strong> <span id="printEmpCode">-</span></div>
+                    <div><strong>Employee Name:</strong> <span id="printEmpName">-</span></div>
+                    <div><strong>Department:</strong> <span id="printDept">-</span></div>
+                    <div><strong>Designation:</strong> <span id="printDesig">-</span></div>
+                    <div><strong>Date of Joining:</strong> <span id="printDOJ">-</span></div>
+                    <div><strong>Date of Exit:</strong> <span id="printExitDate">-</span></div>
+                </div>
+                <div class="border rounded-lg overflow-hidden">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-100 uppercase">
+                            <tr>
+                                <th class="p-2 border-r">Earnings Description</th>
+                                <th class="p-2 text-right">Amount (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printEarningsBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+                <div class="border rounded-lg overflow-hidden">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-100 uppercase">
+                            <tr>
+                                <th class="p-2 border-r">Deductions & Recoveries</th>
+                                <th class="p-2 text-right">Amount (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printDeductionsBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border flex justify-between items-center text-sm font-bold">
+                    <span>Net Settlement Payable / (Recoverable):</span>
+                    <span id="printNetPayable" class="text-indigo-600 text-lg">Rs. 0</span>
+                </div>
+                <div class="text-xs text-slate-500 pt-4 border-t flex justify-between">
+                    <span>Authorized Signature: _____________________</span>
+                    <span>Date: _____________________</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const EMP_STORAGE_KEY = 'sys_employees';
+        const FNF_STORAGE_KEY = 'sys_fnf_settlements';
+        let employees = JSON.parse(localStorage.getItem(EMP_STORAGE_KEY)) || [];
+        let settlements = JSON.parse(localStorage.getItem(FNF_STORAGE_KEY)) || [];
+
+        window.onload = function() {
+            populateEmployeeDatalist();
+            renderSettlementsTable();
+        };
+
+        function switchFnFTab(tab) {
+            const procView = document.getElementById('tabProcessorView');
+            const recView = document.getElementById('tabRecordsView');
+            const btnProc = document.getElementById('btnTabProcessor');
+            const btnRec = document.getElementById('btnTabRecords');
+            if (tab === 'processor') {
+                procView.classList.remove('hidden');
+                recView.classList.add('hidden');
+                btnProc.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnRec.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+            } else {
+                procView.classList.add('hidden');
+                recView.classList.remove('hidden');
+                btnRec.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm";
+                btnProc.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+                renderSettlementsTable();
+            }
+        }
+
+        function populateEmployeeDatalist() {
+            const datalist = document.getElementById('empDatalist');
+            datalist.innerHTML = '';
+            employees.forEach(emp => {
+                datalist.innerHTML += `<option value="${emp.empID}">${emp.empName} (${emp.department || 'No Dept'})</option>`;
+            });
+        }
+
+        function onEmployeeSelect() {
+            const val = document.getElementById('fnfEmpCode').value.trim();
+            const emp = employees.find(e => e.empID.toLowerCase() === val.toLowerCase() || e.empName.toLowerCase() === val.toLowerCase());
+            if (!emp) return;
+
+            document.getElementById('fnfEmpCode').value = emp.empID;
+            document.getElementById('fnfFatherName').value = emp.fatherName || '';
+            document.getElementById('fnfCNIC').value = emp.cnicNumber || '';
+            document.getElementById('fnfDept').value = emp.department || '';
+            document.getElementById('fnfDesig').value = emp.designation || '';
+            document.getElementById('fnfEmpType').value = emp.employmentType || 'Permanent';
+            document.getElementById('fnfDOJ').value = emp.doj || '';
+            document.getElementById('fnfResigDate').value = emp.resignationDate || '';
+            document.getElementById('fnfExitDate').value = emp.exitDate || '';
+            document.getElementById('fnfGrossSalary').value = emp.salary || 0;
+            
+            calculateTenure();
+            calculateNoticePayDeduction();
+            calculateSettlement();
+        }
+
+        function calculateTenure() {
+            const doj = document.getElementById('fnfDOJ').value;
+            const exit = document.getElementById('fnfExitDate').value;
+            if (!doj || !exit) {
+                document.getElementById('fnfTenure').value = '';
+                return;
+            }
+            const d1 = new Date(doj);
+            const d2 = new Date(exit);
+            const diffTime = Math.abs(d2 - d1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const years = Math.floor(diffDays / 365);
+            const months = Math.floor((diffDays % 365) / 30);
+            document.getElementById('fnfTenure').value = `${years} Years, ${months} Months`;
+        }
+
+        function calculateNoticePayDeduction() {
+            const gross = parseFloat(document.getElementById('fnfGrossSalary').value) || 0;
+            const served = parseFloat(document.getElementById('fnfNoticeServedDays').value) || 30;
+            const requiredNotice = 30;
+            if (served < requiredNotice) {
+                const shortfall = requiredNotice - served;
+                const perDay = gross / 30;
+                document.getElementById('fnfNoticeRecoveryAmt').value = Math.round(shortfall * perDay);
+            } else {
+                document.getElementById('fnfNoticeRecoveryAmt').value = 0;
+            }
+        }
+
+        function calculateSettlement() {
+            const earnings = 
+                (parseFloat(document.getElementById('fnfPaidSalaryAmt').value) || 0) +
+                (parseFloat(document.getElementById('fnfLeaveAmt').value) || 0) +
+                (parseFloat(document.getElementById('fnfMgmtAllow').value) || 0) +
+                (parseFloat(document.getElementById('fnfConveyanceAllow').value) || 0) +
+                (parseFloat(document.getElementById('fnfFoodAllow').value) || 0) +
+                (parseFloat(document.getElementById('fnfVehicleAllow').value) || 0) +
+                (parseFloat(document.getElementById('fnfFuelAmt').value) || 0) +
+                (parseFloat(document.getElementById('fnfGratuityAmt').value) || 0) +
+                (parseFloat(document.getElementById('fnfBonus').value) || 0) +
+                (parseFloat(document.getElementById('fnfArrear').value) || 0);
+
+            const deductions = 
+                (parseFloat(document.getElementById('fnfNoticeRecoveryAmt').value) || 0) +
+                (parseFloat(document.getElementById('fnfLoanBalance').value) || 0) +
+                (parseFloat(document.getElementById('fnfAdvance').value) || 0) +
+                (parseFloat(document.getElementById('fnfEobiDeduction').value) || 0) +
+                (parseFloat(document.getElementById('fnfTaxDeduction').value) || 0) +
+                (parseFloat(document.getElementById('fnfAssetLoss').value) || 0);
+
+            const net = earnings - deductions;
+
+            document.getElementById('dispTotalEarnings').innerText = `Rs. ${earnings.toLocaleString()}`;
+            document.getElementById('dispTotalDeductions').innerText = `Rs. ${deductions.toLocaleString()}`;
+            document.getElementById('dispNetSettlement').innerText = `Rs. ${net.toLocaleString()}`;
+            document.getElementById('fnfAmountInWords').value = numberToWords(Math.abs(net)) + (net >= 0 ? " Only (Payable)" : " Only (Recoverable)");
+        }
+
+        function numberToWords(num) {
+            if (num === 0) return "Zero Rupees";
+            return num.toLocaleString() + " Rupees";
+        }
+
+        function resetFnFForm() {
+            document.getElementById('fnfForm').reset();
+            document.getElementById('dispTotalEarnings').innerText = "Rs. 0";
+            document.getElementById('dispTotalDeductions').innerText = "Rs. 0";
+            document.getElementById('dispNetSettlement').innerText = "Rs. 0";
+        }
+
+        function saveFnFSettlement(e) {
+            e.preventDefault();
+            const record = {
+                empID: document.getElementById('fnfEmpCode').value,
+                empName: employees.find(e => e.empID === document.getElementById('fnfEmpCode').value)?.empName || 'Unknown',
+                department: document.getElementById('fnfDept').value,
+                exitDate: document.getElementById('fnfExitDate').value,
+                grossSalary: document.getElementById('fnfGrossSalary').value,
+                netPayable: document.getElementById('dispNetSettlement').innerText,
+                formData: {
+                    fatherName: document.getElementById('fnfFatherName').value,
+                    cnic: document.getElementById('fnfCNIC').value,
+                    designation: document.getElementById('fnfDesig').value,
+                    doj: document.getElementById('fnfDOJ').value,
+                    earnings: {
+                        paidSalary: document.getElementById('fnfPaidSalaryAmt').value,
+                        leaveEncashment: document.getElementById('fnfLeaveAmt').value,
+                        allowances: (parseFloat(document.getElementById('fnfMgmtAllow').value)||0) + (parseFloat(document.getElementById('fnfConveyanceAllow').value)||0),
+                        gratuity: document.getElementById('fnfGratuityAmt').value,
+                        bonus: document.getElementById('fnfBonus').value,
+                        arrears: document.getElementById('fnfArrear').value
+                    },
+                    deductions: {
+                        noticePay: document.getElementById('fnfNoticeRecoveryAmt').value,
+                        loan: document.getElementById('fnfLoanBalance').value,
+                        advance: document.getElementById('fnfAdvance').value,
+                        tax: document.getElementById('fnfTaxDeduction').value,
+                        other: document.getElementById('fnfAssetLoss').value
+                    }
+                }
+            };
+            settlements.push(record);
+            localStorage.setItem(FNF_STORAGE_KEY, JSON.stringify(settlements));
+            alert('Full & Final Settlement saved successfully!');
+            switchFnFTab('records');
+        }
+
+        function renderSettlementsTable() {
+            const tbody = document.getElementById('settlementsTableBody');
+            tbody.innerHTML = '';
+            if (settlements.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 font-medium">No saved settlement records found.</td></tr>`;
+                return;
+            }
+            settlements.forEach((st, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-4 font-mono font-bold text-indigo-600 border-r text-xs">${st.empID}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 border-r">${st.empName}</td>
+                        <td class="py-3 px-4 border-r text-xs font-semibold text-slate-700">${st.department || '-'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">${st.exitDate || '-'}</td>
+                        <td class="py-3 px-4 border-r text-xs text-slate-600">Rs. ${parseFloat(st.grossSalary||0).toLocaleString()}</td>
+                        <td class="py-3 px-4 border-r font-bold text-xs text-indigo-600">${st.netPayable}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="openViewModal(${idx})" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition text-xs font-semibold"><i class="fa-solid fa-eye"></i> View</button>
+                                <button onclick="deleteSettlement(${idx})" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-md transition text-xs font-semibold"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openViewModal(index) {
+            const st = settlements[index];
+            document.getElementById('printEmpCode').innerText = st.empID;
+            document.getElementById('printEmpName').innerText = st.empName;
+            document.getElementById('printDept').innerText = st.department;
+            document.getElementById('printDesig').innerText = st.formData.designation;
+            document.getElementById('printDOJ').innerText = st.formData.doj;
+            document.getElementById('printExitDate').innerText = st.exitDate;
+
+            const eBody = document.getElementById('printEarningsBody');
+            eBody.innerHTML = `
+                <tr><td class="p-2 border-r">Paid Salary Amount</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.earnings.paidSalary||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Leave Encashment</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.earnings.leaveEncashment||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Allowances</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.earnings.allowances||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Gratuity Amount</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.earnings.gratuity||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Bonus & Arrears</td><td class="p-2 text-right">Rs. ${(parseFloat(st.formData.earnings.bonus||0)+parseFloat(st.formData.earnings.arrears||0)).toLocaleString()}</td></tr>
+            `;
+
+            const dBody = document.getElementById('printDeductionsBody');
+            dBody.innerHTML = `
+                <tr><td class="p-2 border-r">Notice Pay Deduction</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.deductions.noticePay||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Outstanding Loan</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.deductions.loan||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Advance Salary</td><td class="p-2 text-right">Rs. ${parseFloat(st.formData.deductions.advance||0).toLocaleString()}</td></tr>
+                <tr><td class="p-2 border-r">Income Tax & Other</td><td class="p-2 text-right">Rs. ${(parseFloat(st.formData.deductions.tax||0)+parseFloat(st.formData.deductions.other||0)).toLocaleString()}</td></tr>
+            `;
+
+            document.getElementById('printNetPayable').innerText = st.netPayable;
+            document.getElementById('viewModal').classList.remove('hidden');
+            document.getElementById('viewModal').classList.add('flex');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('flex');
+            document.getElementById('viewModal').classList.add('hidden');
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('settlementPrintArea');
+            html2pdf().from(element).save('FnF_Settlement_Certificate.pdf');
+        }
+
+        function deleteSettlement(index) {
+            if (confirm('Delete this saved settlement record?')) {
+                settlements.splice(index, 1);
+                localStorage.setItem(FNF_STORAGE_KEY, JSON.stringify(settlements));
+                renderSettlementsTable();
+            }
+        }
+
+        function exportToExcel(tableID, filename = '') {
+            const downloadLink = document.createElement("a");
+            const tableSelect = document.getElementById(tableID);
+            const tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            downloadLink.href = 'data:application/vnd.ms-excel, ' + tableHTML;
+            downloadLink.download = (filename || 'export') + '.xls';
+            downloadLink.click();
+        }
+    </script>
+</body>
+</html>

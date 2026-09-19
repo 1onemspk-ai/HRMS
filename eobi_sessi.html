@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EOBI & SESSI Rules - HRMS Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Scrollbar (From Code 1) */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar / Navigation Bar (Aligned with Code 1 Style) -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0">
+            <div class="p-5 text-2xl font-bold text-white tracking-wider border-b border-slate-800 flex items-center gap-3">
+                <i class="fa-solid fa-users-gear text-indigo-500"></i> HRMS Portal
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm custom-scrollbar">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
+                <a href="employees.html" onclick="protectNav(event, 'employees.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-address-book w-5"></i> Employee Management
+                </a>
+                <a href="attendance.html" onclick="protectNav(event, 'attendance.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i> Attendance Management
+                </a>
+                <a href="leaves.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-calendar-days w-5"></i> Leaves</a>
+                <a href="loans.html" onclick="protectNav(event, 'loans.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-hand-holding-dollar w-5"></i> Loans & Advances
+                </a>
+                <a href="tax.html" onclick="protectNav(event, 'tax.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i> Income Tax
+                </a>
+                <a href="payroll.html" onclick="protectNav(event, 'payroll.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-money-bill-wave w-5"></i> Payroll Processing
+                </a>
+                <a href="benefits.html" onclick="protectNav(event, 'benefits.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-gift w-5"></i> Employee Benefits
+                </a>
+                <!-- Active EOBI & SESSI Tab -->
+                <a href="eobi_sessi.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium shadow-md">
+                    <i class="fa-solid fa-shield-halved w-5"></i> EOBI & SESSI
+                </a>
+                <a href="reports.html" onclick="protectNav(event, 'reports.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-chart-line w-5"></i> Reports
+                </a>
+                <a href="fnf.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-file-signature w-5"></i> Full & Final Settlement
+                </a>
+                <a href="audit.html" onclick="protectNav(event, 'audit.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-clipboard-list w-5"></i> Audit Logs
+                </a>
+                <a href="users.html" onclick="protectNav(event, 'users.html')" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-users-gear w-5"></i> User Management
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                HRMS Enterprise v2.6 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center border-b sticky top-0 z-20">
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-indigo-600"></i> EOBI & SESSI Statutory Rules Configuration
+                </h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-slate-600">HQ: admin@hrms.com</span>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">HQ</div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+                
+                <!-- Tab Switching Bar -->
+                <div class="flex border-b border-slate-200 bg-white rounded-xl shadow-sm p-2 gap-2">
+                    <button class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <i class="fa-solid fa-sliders"></i> Statutory Rules Configuration
+                    </button>
+                    <button class="px-5 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-history"></i> Statutory History
+                    </button>
+                </div>
+
+                <!-- Setup Form Card -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-3">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-gears text-indigo-600"></i> Active Policy Configuration
+                        </h2>
+                        <p class="text-xs text-slate-500">Set the mandatory threshold caps and percentage calculations applied to monthly payroll generation.</p>
+                    </div>
+
+                    <form id="statutoryRulesForm" onsubmit="saveStatutoryRules(event)" class="space-y-6">
+                        
+                        <!-- Financial Year -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Financial Year *</label>
+                                <select id="financialYear" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="2025-2026">2025-2026</option>
+                                    <option value="2026-2027" selected>2026-2027</option>
+                                    <option value="2027-2028">2027-2028</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- EOBI Rule Settings -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-building-columns"></i> EOBI Rule Settings</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Wage Ceiling / Min Wage (Rs.)</label>
+                                    <input type="number" id="eobiWageCap" value="32000" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Employer Contribution (%)</label>
+                                    <input type="number" step="0.01" id="eobiEmployerRate" value="5.00" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">EOBI Employee Contribution (%)</label>
+                                    <input type="number" step="0.01" id="eobiEmployeeRate" value="1.00" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Male Age Limit / Retirement (Years)</label>
+                                    <input type="number" id="maleAgeLimit" value="60" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Female Age Limit / Retirement (Years)</label>
+                                    <input type="number" id="femaleAgeLimit" value="55" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SESSI Rule Settings (Auto-Completed) -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b pb-1"><i class="fa-solid fa-hospital-user"></i> SESSI Rule Settings</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">SESSI Wage Ceiling (Rs.)</label>
+                                    <input type="number" id="sessiWageCap" value="32000" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">SESSI Employer Contribution (%)</label>
+                                    <input type="number" step="0.01" id="sessiEmployerRate" value="6.00" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">SESSI Employee Contribution (%)</label>
+                                    <input type="number" step="0.01" id="sessiEmployeeRate" value="0.00" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-5 border-t">
+                            <button type="button" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">Reset Defaults</button>
+                            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Rules Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic to mimic Code 1 interactivity -->
+    <script>
+        function saveStatutoryRules(e) {
+            e.preventDefault();
+            // Store variables directly to localStorage to keep persistence behavior identical to Code 1
+            const rules = {
+                financialYear: document.getElementById('financialYear').value,
+                eobiWageCap: document.getElementById('eobiWageCap').value,
+                eobiEmployerRate: document.getElementById('eobiEmployerRate').value,
+                eobiEmployeeRate: document.getElementById('eobiEmployeeRate').value,
+                maleAgeLimit: document.getElementById('maleAgeLimit').value,
+                femaleAgeLimit: document.getElementById('femaleAgeLimit').value,
+                sessiWageCap: document.getElementById('sessiWageCap').value,
+                sessiEmployerRate: document.getElementById('sessiEmployerRate').value,
+                sessiEmployeeRate: document.getElementById('sessiEmployeeRate').value
+            };
+            localStorage.setItem('sys_statutory_rules', JSON.stringify(rules));
+            alert('Statutory Rule configurations saved successfully. These rates will now apply to payroll generation.');
+        }
+
+        // Initialize App on load to fetch previous saved rules
+        window.onload = function() {
+            const savedRules = JSON.parse(localStorage.getItem('sys_statutory_rules'));
+            if(savedRules) {
+                document.getElementById('financialYear').value = savedRules.financialYear;
+                document.getElementById('eobiWageCap').value = savedRules.eobiWageCap;
+                document.getElementById('eobiEmployerRate').value = savedRules.eobiEmployerRate;
+                document.getElementById('eobiEmployeeRate').value = savedRules.eobiEmployeeRate;
+                document.getElementById('maleAgeLimit').value = savedRules.maleAgeLimit;
+                document.getElementById('femaleAgeLimit').value = savedRules.femaleAgeLimit;
+                document.getElementById('sessiWageCap').value = savedRules.sessiWageCap;
+                document.getElementById('sessiEmployerRate').value = savedRules.sessiEmployerRate;
+                document.getElementById('sessiEmployeeRate').value = savedRules.sessiEmployeeRate;
+            }
+        };
+    </script>
+</body>
+</html>
