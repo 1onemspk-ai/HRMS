@@ -7,17 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 class="text-2xl font-bold mb-6 text-center">1Onems HRMS Login</h2>
-        
         <input id="email" type="email" placeholder="Email" class="w-full p-3 border rounded mb-4" value="hrrayyan1@gmail.com">
         <input id="password" type="password" placeholder="Password" class="w-full p-3 border rounded mb-4">
-        
-        <button id="loginBtn" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
-            Login
-        </button>
-
+        <button id="loginBtn" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">Login</button>
         <p id="errorMsg" class="text-red-600 text-sm mt-4 text-center"></p>
     </div>
 
@@ -25,45 +19,32 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-  // Tumhara Firebase Config - Ye wahi rehne do jo pehle tha
   const firebaseConfig = {
-    apiKey: "AIzaSyC7F3...",
+    apiKey: "AIzaSyDJZ0ar9qZvFMWY33GyMvCg0YaCxmrA7c",
     authDomain: "onems---hrms.firebaseapp.com",
     projectId: "onems---hrms",
-    storageBucket: "onems---hrms.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
+    storageBucket: "onems---hrms.firebasestorage.app",
+    messagingSenderId: "129741940588",
+    appId: "1:129741940588:web:fe8fa119a21699366b3549",
+    measurementId: "G-QKRZX3ZZNJ"
   };
-
-  // Agar tumhare purane login.html me firebaseConfig alag hai to wahi copy karke yahan paste kar dena
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  const loginBtn = document.getElementById('loginBtn');
-  const errorMsg = document.getElementById('errorMsg');
-
-  loginBtn.addEventListener('click', async () => {
+  document.getElementById('loginBtn').addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
-
-    if (!email || !password) {
-        errorMsg.innerText = "Email aur Password likho!";
-        return;
-    }
-
-    errorMsg.innerText = "Logging in...";
-    
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.innerText = "Checking...";
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // SUCCESS - Yahan main fix kiya hai
-      window.location.href = "index.html"; 
-    } catch (error) {
-      console.log(error);
-      errorMsg.innerText = error.message;
+      window.location.href = "index.html";
+    } catch (e) {
+      errorMsg.innerText = e.message;
+      console.log(e);
     }
   });
 </script>
-
 </body>
 </html>
