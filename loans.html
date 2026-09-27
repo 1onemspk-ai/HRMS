@@ -384,5 +384,30 @@
             }
         }
     </script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDJZ0rar9qZvfMWY33GyMvCg0YaCxmrA7c",
+        authDomain: "onems---hrms.firebaseapp.com",
+        projectId: "onems---hrms",
+        storageBucket: "onems---hrms.firebasestorage.app",
+        messagingSenderId: "129741940588",
+        appId: "1:129741940588:web:fe8fa119a21699366b3549",
+        measurementId: "G-QKRZX3ZZNJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Auth state check karein
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Agar user login nahi hai, toh login page par redirect kar do
+            window.location.href = "login.html";
+        }
+    });
+</script>
 </body>
 </html>
