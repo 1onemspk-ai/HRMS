@@ -27,48 +27,6 @@
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased">
-    <!-- ================= LOGIN MODAL / SCREEN ================= -->
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg mb-3">
-                    <i class="fa-solid fa-users-gear"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">HRMS Portal Login</h2>
-                <p class="text-xs text-slate-500 mt-1">Authorized Personnel Only</p>
-            </div>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Username</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <i class="fa-solid fa-user"></i>
-                        </span>
-                        <input type="text" id="loginUserId" required placeholder="admin" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
-                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                    </div>
-                </div>
-                <div id="loginError" class="hidden text-xs text-rose-600 font-semibold text-center bg-rose-50 p-2 rounded-lg border border-rose-200">
-                    Invalid User ID or Password!
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Login to System
-                </button>
-            </form>
-            <div class="mt-4 text-center text-xs text-slate-400">
-                Default Credentials: <b>admin</b> / <b>admin123</b>
-            </div>
-        </div>
-    </div>
     <!-- ================= MAIN APP DASHBOARD ================= -->
     <div id="appContainer" class="hidden flex h-screen overflow-hidden">
         
