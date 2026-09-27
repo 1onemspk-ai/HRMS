@@ -147,7 +147,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- SECTION-WISE CHARTS FOR ALL SIDEBAR NAVIGATION MODULES -->
                 <div class="space-y-6 pt-4">
                     <div class="border-b pb-2">
@@ -156,7 +155,6 @@
                         </h3>
                         <p class="text-xs text-slate-500">Visual performance charts and distribution metrics across all sidebar modules.</p>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
                         <!-- 1. Employee Management Chart -->
@@ -195,7 +193,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 2. Attendance Management Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -232,7 +229,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 3. Leaves Management Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -269,7 +265,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 4. Loans & Advances Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -306,7 +301,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 5. Income Tax Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -343,7 +337,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 6. Payroll Processing Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -380,7 +373,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 7. Employee Benefits Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -417,7 +409,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 8. EOBI & SESSI Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -445,7 +436,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 9. Reports Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -482,7 +472,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 10. Full & Final Settlement Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -510,7 +499,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 11. Audit Logs Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -547,7 +535,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- 12. User Management Chart -->
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between border-b pb-2">
@@ -575,10 +562,8 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
@@ -607,12 +592,6 @@
             const id = document.getElementById('loginUserId').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
             
-            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
-                localStorage.setItem(AUTH_KEY, id);
-                document.getElementById('loginError').classList.add('hidden');
-                checkAuthStatus();
-                return;
-            }
             const savedUsers = JSON.parse(localStorage.getItem('sys_users')) || 
                                JSON.parse(localStorage.getItem('users')) || 
                                JSON.parse(localStorage.getItem('sys_clients')) || 
@@ -659,7 +638,6 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
     const firebaseConfig = {
         apiKey: "AIzaSyDJZ0rar9qZvfMWY33GyMvCg0YaCxmrA7c",
         authDomain: "onems---hrms.firebaseapp.com",
@@ -669,10 +647,8 @@
         appId: "1:129741940588:web:fe8fa119a21699366b3549",
         measurementId: "G-QKRZX3ZZNJ"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
     // Auth state check karein
     onAuthStateChanged(auth, (user) => {
         if (!user) {
