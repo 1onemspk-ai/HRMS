@@ -3,48 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1Onems HRMS - Login</title>
+    <title>HRMS Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-center">1Onems HRMS Login</h2>
-        <input id="email" type="email" placeholder="Email" class="w-full p-3 border rounded mb-4" value="hrrayyan1@gmail.com">
-        <input id="password" type="password" placeholder="Password" class="w-full p-3 border rounded mb-4">
-        <button id="loginBtn" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">Login</button>
-        <p id="errorMsg" class="text-red-600 text-sm mt-4 text-center"></p>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="bg-white p-8 rounded shadow-md w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">HRMS Login</h2>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Login</button>
+            <p id="errorMsg" class="text-red-500 text-sm mt-4 text-center"></p>
+        </form>
     </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    <!-- Firebase Login Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDJZ0ar9qZvFMWY33GyMvCg0YaCxmrA7c",
-    authDomain: "onems---hrms.firebaseapp.com",
-    projectId: "onems---hrms",
-    storageBucket: "onems---hrms.firebasestorage.app",
-    messagingSenderId: "129741940588",
-    appId: "1:129741940588:web:fe8fa119a21699366b3549",
-    measurementId: "G-QKRZX3ZZNJ"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJZ0rar9qZvfMWY33GyMvCg0YaCxmrA7c",
+            authDomain: "onems---hrms.firebaseapp.com",
+            projectId: "onems---hrms",
+            storageBucket: "onems---hrms.firebasestorage.app",
+            messagingSenderId: "129741940588",
+            appId: "1:129741940588:web:fe8fa119a21699366b3549",
+            measurementId: "G-QKRZX3ZZNJ"
+        };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorMsg = document.getElementById('errorMsg');
-    errorMsg.innerText = "Checking...";
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = "index.html";
-    } catch (e) {
-      errorMsg.innerText = e.message;
-      console.log(e);
-    }
-  });
-</script>
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // Successful login hone par main page par chale jayein
+                window.location.href = "index.html"; 
+            } catch (error) {
+                document.getElementById('errorMsg').innerText = "Ghalat Email ya Password!";
+            }
+        });
+    </script>
 </body>
 </html>
